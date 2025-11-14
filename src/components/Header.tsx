@@ -13,8 +13,10 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ breadcrumbs }) => {
   const { toggle } = useSidebarStore();
 
+  // Replace the event dispatch with this direct DOM manipulation:
   const handleSearchClick = () => {
-    window.dispatchEvent(new CustomEvent('open-search-modal'));
+    document.getElementById("search-modal-overlay")?.classList.add("visible");
+    (document.getElementById("search-input") as HTMLInputElement)?.focus();
   };
 
   return (
