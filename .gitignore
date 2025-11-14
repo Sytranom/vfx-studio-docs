@@ -16,3 +16,8 @@
 # System files
 .DS_Store
 *.swp
+
+# Testing
+/cc.py
+/ccvs.txt
+/ccvf.txt

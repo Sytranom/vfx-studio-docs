@@ -3,10 +3,6 @@ import {
   faRocket,
   faBook,
   faBookOpen,
-  faStar,
-  faBezierCurve,
-  faSliders,
-  faKeyboard,
   faGithub,
 } from "@fortawesome/free-solid-svg-icons";
 import { faDiscord } from "@fortawesome/free-brands-svg-icons";
@@ -14,7 +10,7 @@ import { faDiscord } from "@fortawesome/free-brands-svg-icons";
 export interface NavItem {
   title: string;
   href: string;
-  icon?: IconDefinition; // Changed from required to optional
+  icon?: IconDefinition;
   children?: NavItem[];
 }
 
@@ -39,11 +35,11 @@ export const navigation: NavSection[] = [
                 href: '#', 
                 icon: faBookOpen,
                 children: [
-                    // Update the href to point to the new dynamic route
+                    // Corrected links to point to the new dynamic routes
                     { title: 'Advanced Panel', href: '/docs/reference-advanced' },
-                    { title: 'Curve Editor', href: '/reference-bezier' },
-                    { title: 'Sliders Panel', href: '/reference-sliders' },
-                    { title: 'Keybinds', href: '/reference-keybinds' },
+                    { title: 'Curve Editor', href: '/docs/reference-bezier' },
+                    { title: 'Sliders Panel', href: '/docs/reference-sliders' },
+                    { title: 'Keybinds', href: '/docs/reference-keybinds' },
                 ],
             },
         ],

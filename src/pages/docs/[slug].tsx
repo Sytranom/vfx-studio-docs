@@ -1,18 +1,19 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { GetStaticProps, GetStaticPaths } from "next";
-// Corrected imports for the Pages Router
-import Seo from "@/components/Seo"; // Import Seo component
 import { MDXRemote } from "next-mdx-remote";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import matter from "gray-matter";
 
+// --- NEW IMPORTS ---
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+
 import Layout from "@/components/Layout";
 import InfoBox from "@/components/InfoBox";
 import CodeBlock from "@/components/CodeBlock";
 
-// Define the shape of our props, which is correct
 interface DocsPageProps {
   source: MDXRemoteSerializeResult;
   frontMatter: { [key: string]: any };
@@ -20,7 +21,6 @@ interface DocsPageProps {
 
 export default function DocsPage({ source, frontMatter }: DocsPageProps) {
   return (
-    // Pass title and description from the MDX frontmatter to the Layout
     <Layout
       breadcrumbs={frontMatter.breadcrumbs || "Docs"}
       title={frontMatter.title || "Docs"}
@@ -35,7 +35,6 @@ export default function DocsPage({ source, frontMatter }: DocsPageProps) {
 
 const docsDirectory = path.join(process.cwd(), "_docs");
 
-// This function is correct and does not need to change
 export const getStaticPaths: GetStaticPaths = async () => {
   const filenames = await fs.readdir(docsDirectory);
   const paths = filenames.map((filename) => ({
@@ -47,7 +46,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: false };
 };
 
-// This function is also correct and does not need to change
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params?.slug as string;
   if (!slug) {
@@ -59,7 +57,17 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   try {
     const fileContents = await fs.readFile(filePath, "utf8");
     const { content, data } = matter(fileContents);
-    const mdxSource = await serialize(content, { parseFrontmatter: false });
+    
+    // --- UPDATED MDX SERIALIZATION ---
+    const mdxSource = await serialize(content, {
+      parseFrontmatter: false,
+      mdxOptions: {
+        rehypePlugins: [
+          rehypeSlug, // Adds IDs to headings
+          [rehypeAutolinkHeadings, { behavior: "wrap" }], // Makes headings clickable
+        ],
+      },
+    });
 
     return {
       props: {
@@ -68,7 +76,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       },
     };
   } catch (error) {
-    // If the file doesn't exist, return a 404
     return { notFound: true };
   }
 };

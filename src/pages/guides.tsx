@@ -1,70 +1,43 @@
 import Layout from "@/components/Layout";
-import Link from "next/link";
+import Card from "@/components/Card"; // <-- Import the new component
+import {
+  faCameraRotate,
+  faRoute,
+  faBookmark,
+  faPalette,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function GuidesPage() {
   return (
-    <Layout breadcrumbs="Getting Started / How-To Guides">
-      <div className="hero">
-        <h1 className="hero-title">How-To Guides</h1>
-        <p className="hero-subtitle">
+    <Layout breadcrumbs="Getting Started / How-To Guides" title="How-To Guides">
+      <div className="text-center pb-12">
+        <h1 className="text-5xl font-bold mb-2">How-To Guides</h1>
+        <p className="text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed">
           Find practical solutions to common problems. These guides are focused
           on accomplishing a specific task, assuming you know the basics.
         </p>
       </div>
 
-      <div className="card-grid">
-        <Link href="#" className="card card-howto">
-          <div className="card-icon">
-            <i className="fa-solid fa-camera-rotate"></i>
-          </div>
-          <h2 className="card-title">How to Create a Camera Shake</h2>
-          <p className="card-description">
-            Learn to add powerful, cinematic camera shakes to your effects using
-            the Advanced Panel.
-          </p>
-          <div className="card-arrow">
-            <i className="fa-solid fa-arrow-right"></i>
-          </div>
-        </Link>
-        <Link href="#" className="card card-howto">
-          <div className="card-icon">
-            <i className="fa-solid fa-route"></i>
-          </div>
-          <h2 className="card-title">How to Animate an Object Along a Path</h2>
-          <p className="card-description">
-            A detailed guide on using the different Path Modes in the Advanced
-            Panel's Tween section.
-          </p>
-          <div className="card-arrow">
-            <i className="fa-solid fa-arrow-right"></i>
-          </div>
-        </Link>
-        <Link href="#" className="card card-howto">
-          <div className="card-icon">
-            <i className="fa-solid fa-bookmark"></i>
-          </div>
-          <h2 className="card-title">How to Save and Reuse Property Sets</h2>
-          <p className="card-description">
-            Speed up your workflow by saving collections of properties as
-            presets that can be applied to any emitter.
-          </p>
-          <div className="card-arrow">
-            <i className="fa-solid fa-arrow-right"></i>
-          </div>
-        </Link>
-        <Link href="#" className="card card-howto">
-          <div className="card-icon">
-            <i className="fa-solid fa-palette"></i>
-          </div>
-          <h2 className="card-title">How to Use Custom Themes</h2>
-          <p className="card-description">
-            Personalize your workspace by creating, importing, and applying
-            different color themes in the Settings panel.
-          </p>
-          <div className="card-arrow">
-            <i className="fa-solid fa-arrow-right"></i>
-          </div>
-        </Link>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card href="/guides/camera-shake" icon={faCameraRotate} title="How to Create a Camera Shake">
+          Learn to add powerful, cinematic camera shakes to your effects using
+          the Advanced Panel.
+        </Card>
+
+        <Card href="#" icon={faRoute} title="How to Animate an Object Along a Path" disabled>
+          A detailed guide on using the different Path Modes in the Advanced
+          Panel's Tween section.
+        </Card>
+
+        <Card href="#" icon={faBookmark} title="How to Save and Reuse Property Sets" disabled>
+          Speed up your workflow by saving collections of properties as
+          presets that can be applied to any emitter.
+        </Card>
+
+        <Card href="#" icon={faPalette} title="How to Use Custom Themes" disabled>
+          Personalize your workspace by creating, importing, and applying
+          different color themes in the Settings panel.
+        </Card>
       </div>
     </Layout>
   );
