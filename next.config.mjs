@@ -12,7 +12,7 @@ const nextConfig = {
     unoptimized: true,
   },
   // UNCOMMENT this line before deploying to GitHub Pages.
-  // basePath: '/vfx-studio-docs', 
+  basePath: '/vfx-studio-docs', 
 };
 
 export default withMDX(nextConfig);
