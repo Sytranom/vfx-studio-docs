@@ -4,8 +4,6 @@ const withMDX = nextMDX()
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // We're using the App Router which is the future of Next.js
-  // This enables it.
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
 
   // --- CONFIG FOR GITHUB PAGES ---
@@ -13,6 +11,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+ basePath: '/vfx-studio-docs', 
 };
 
-export default withMDX(nextConfig);
+export default withMDX(withMDX(nextConfig));

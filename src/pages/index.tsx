@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default function HomePage() {
+  const basePath = "/vfx-studio-docs"; // Define base path for images
+
   return (
     <Layout breadcrumbs="Home" title="Home">
       {/* Hero Section */}
@@ -37,7 +39,7 @@ export default function HomePage() {
           </div>
           <div className="feature-image">
             <Image
-              src="/input_file_0.png"
+              src={`${basePath}/input_file_0.png`}
               alt="Emitter and Sliders Panel"
               width={400}
               height={550}
@@ -59,7 +61,7 @@ export default function HomePage() {
           </div>
           <div className="feature-image row-start-1">
             <Image
-              src="/input_file_1.png"
+              src={`${basePath}/input_file_1.png`}
               alt="Bezier Curve Editor"
               width={500}
               height={450}
@@ -79,7 +81,7 @@ export default function HomePage() {
           </div>
           <div className="feature-image">
             <Image
-              src="/input_file_2.png"
+              src={`${basePath}/input_file_2.png`}
               alt="Asset Library"
               width={400}
               height={600}
