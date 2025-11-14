@@ -16,7 +16,7 @@ async function generateSearchIndex() {
         slug: `/docs/${filename.replace(/\.mdx$/, '')}`,
         title: data.title,
         breadcrumbs: data.breadcrumbs,
-        content: content.replace(/#+\s/g, '').replace(/\n/g, ' '), // Basic content cleaning
+        content: content.replace(/#+\s/g, '').replace(/\n/g, ' '),
       };
     })
   );

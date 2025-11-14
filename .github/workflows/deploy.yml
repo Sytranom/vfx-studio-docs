@@ -3,8 +3,8 @@ name: Deploy Docs to GitHub Pages
 on:
   push:
     branches:
-      - main # Trigger the action on push to the main branch
-  workflow_dispatch: # Allow running this workflow manually from the Actions tab
+      - main
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:

@@ -1,5 +1,5 @@
 import Layout from "@/components/Layout";
-import Card from "@/components/Card"; // <-- Import the new component
+import Card from "@/components/Card";
 import {
   faCameraRotate,
   faRoute,

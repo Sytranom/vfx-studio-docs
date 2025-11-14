@@ -34,7 +34,6 @@ export const navigation: NavSection[] = [
                 href: '#', 
                 icon: faBookOpen,
                 children: [
-                    // Corrected links to point to the new dynamic routes
                     { title: 'Advanced Panel', href: '/docs/reference-advanced' },
                     { title: 'Curve Editor', href: '/docs/reference-bezier' },
                     { title: 'Sliders Panel', href: '/docs/reference-sliders' },

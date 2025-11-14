@@ -1,141 +1,41 @@
-import React, { useEffect, useState, useRef } from "react";
-import Link from "next/link";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
-import FlexSearch from "flexsearch";
+import React, { useState, useEffect, useCallback } from 'react';
+import { DocSearchModal, useDocSearchKeyboardEvents } from '@docsearch/react';
+import { createPortal } from 'react-dom';
 
-interface SearchDoc {
-  id: number;
-  slug: string;
-  title: string;
-  breadcrumbs: string;
-}
+const ALGOLIA_APP_ID = 'YOUR_APP_ID';
+const ALGOLIA_API_KEY = 'YOUR_API_KEY';
+const ALGOLIA_INDEX_NAME = 'YOUR_INDEX_NAME';
 
-const SearchModal: React.FC = () => {
-  const [index, setIndex] = useState<FlexSearch.Document<SearchDoc, true> | null>(null);
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchDoc[]>([]);
+const SearchModal = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  // --- Setup ---
-  const closeModal = () => {
-    document.getElementById("search-modal-overlay")?.classList.remove("visible");
-  };
+  useDocSearchKeyboardEvents({ isOpen, onOpen: () => setIsOpen(true), onClose: () => setIsOpen(false) });
 
-  const openModal = () => {
-    document.getElementById("search-modal-overlay")?.classList.add("visible");
-    (document.getElementById("search-input") as HTMLInputElement)?.focus();
-  };
-  
-  // --- Initialize Search Index ---
   useEffect(() => {
-    const searchIndex = new FlexSearch.Document<SearchDoc, true>({
-        document: {
-            id: "id",
-            index: ["title", "breadcrumbs"],
-            store: true,
-        },
-        tokenize: "forward"
-    });
-
-    fetch("/search.json")
-      .then((response) => response.json())
-      .then((docs: Omit<SearchDoc, 'id'>[]) => {
-        docs.forEach((doc, i) => {
-            searchIndex.add({ ...doc, id: i });
-        });
-        setIndex(searchIndex);
-      });
-  }, []);
-
-  // --- Handle Search Query ---
-  useEffect(() => {
-    if (!query || !index) {
-      setResults([]);
-      return;
+    setIsMounted(true);
+    const openModal = () => setIsOpen(true);
+    window.addEventListener('open-search-modal', openModal);
+    return () => {
+      window.removeEventListener('open-search-modal', openModal);
     }
-    // --- THIS IS THE FIX ---
-    // We now provide a limit (e.g., 15 results) as the second argument.
-    const searchResults = index.search<true>(query, 15, { enrich: true });
-    
-    // Flatten the results from different fields (title, breadcrumbs)
-    const flatResults: SearchDoc[] = [];
-    const seenIds = new Set();
-    
-    searchResults.forEach(fieldResult => {
-        fieldResult.result.forEach(doc => {
-            if (!seenIds.has(doc.doc.id)) {
-                flatResults.push(doc.doc);
-                seenIds.add(doc.doc.id);
-            }
-        });
-    });
-
-    setResults(flatResults);
-  }, [query, index]);
-
-
-  // --- Keyboard Shortcuts ---
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-        e.preventDefault();
-        openModal();
-      }
-      if (e.key === "Escape") {
-        closeModal();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  return (
-    <div
-      className="fixed inset-0 bg-bg-main/70 backdrop-blur-sm z-50 flex justify-center pt-20 transition-opacity duration-200 search-modal-overlay"
-      id="search-modal-overlay"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) closeModal();
-      }}
-    >
-      <div className="w-full max-w-2xl h-fit bg-bg-surface rounded-lg border border-border-color shadow-2xl overflow-hidden transform-gpu transition-transform duration-200">
-        <div className="flex items-center p-4 border-b border-border-color">
-          <FontAwesomeIcon icon={faSearch} className="text-text-secondary mr-4" />
-          <input
-            type="text"
-            placeholder="Search documentation..."
-            id="search-input"
-            className="w-full bg-transparent border-none outline-none text-text-primary text-lg"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <button
-            className="ml-4 bg-bg-inset border border-border-color text-text-secondary rounded-md px-3 py-1 text-xs font-mono"
-            onClick={closeModal}
-          >
-            ESC
-          </button>
-        </div>
-        <div className="max-h-[400px] overflow-y-auto" id="search-results">
-          {results.length > 0 ? (
-            <ul>
-                {results.map(result => (
-                    <li key={result.id}>
-                        <Link href={result.slug} onClick={closeModal} className="block p-4 hover:bg-bg-inset border-b border-border-color">
-                            <div className="font-medium text-text-primary">{result.title}</div>
-                            <div className="text-sm text-text-secondary">{result.breadcrumbs}</div>
-                        </Link>
-                    </li>
-                ))}
-            </ul>
-          ) : (
-            <div className="p-6 text-center text-text-secondary">
-              <p>{query ? "No results found." : "Type to search..."}</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+  if (!isMounted) {
+    return null;
+  }
+
+  return createPortal(
+    isOpen && (
+      <DocSearchModal
+        appId={ALGOLIA_APP_ID}
+        apiKey={ALGOLIA_API_KEY}
+        indexName={ALGOLIA_INDEX_NAME}
+        onClose={() => setIsOpen(false)}
+        placeholder="Search documentation..."
+      />
+    ),
+    document.body
   );
 };
 

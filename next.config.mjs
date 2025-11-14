@@ -11,7 +11,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
- basePath: '/vfx-studio-docs', 
+  // UNCOMMENT this line before deploying to GitHub Pages.
+  // basePath: '/vfx-studio-docs', 
 };
 
-export default withMDX(withMDX(nextConfig));
+export default withMDX(nextConfig);

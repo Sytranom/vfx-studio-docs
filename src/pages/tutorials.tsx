@@ -1,11 +1,10 @@
 import Layout from "@/components/Layout";
-import Card from "@/components/Card"; // <-- Import the new component
+import Card from "@/components/Card";
 import {
   faHatWizard,
   faChartLine,
   faRoute,
 } from "@fortawesome/free-solid-svg-icons";
-
 
 export default function TutorialsPage() {
   return (
