@@ -3,9 +3,8 @@ import {
   faRocket,
   faBook,
   faBookOpen,
-  faGithub,
 } from "@fortawesome/free-solid-svg-icons";
-import { faDiscord } from "@fortawesome/free-brands-svg-icons";
+import { faDiscord, faGithub } from "@fortawesome/free-brands-svg-icons";
 
 export interface NavItem {
   title: string;
