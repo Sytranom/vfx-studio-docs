@@ -53,8 +53,12 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
   currentPath,
 }) => {
   const hasChildren = item.children && item.children.length > 0;
-  const isParentOfActive =
-    hasChildren && item.children.some((child) => child.href === currentPath);
+  
+  // --- THIS IS THE FIX ---
+  // We use optional chaining `?.` to safely access `.some`.
+  // If `item.children` is undefined, this whole expression becomes `undefined`.
+  // The nullish coalescing operator `?? false` then turns that `undefined` into `false`.
+  const isParentOfActive = item.children?.some((child) => child.href === currentPath) ?? false;
 
   const [isOpen, setIsOpen] = useState(isParentOfActive);
   const prevIsParentOfActive = usePrevious(isParentOfActive);
