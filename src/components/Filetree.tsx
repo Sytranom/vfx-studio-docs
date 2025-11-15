@@ -24,7 +24,6 @@ export const Folder: React.FC<{ name: string; children?: React.ReactNode }> = ({
     </li>
   );
 };
-
 export const File: React.FC<{ name: string }> = ({ name }) => {
   return (
     <li className="file-tree-item">
