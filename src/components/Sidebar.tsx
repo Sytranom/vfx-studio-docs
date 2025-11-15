@@ -36,8 +36,9 @@ const Sidebar: React.FC = () => {
       <div className="flex flex-col h-full">
         <div className="h-[60px] flex-shrink-0 flex items-center px-3">
           <Link href="/" className="flex items-center gap-3 text-xl font-semibold text-text-primary no-underline">
-            <span className="inline-block w-6 h-6 bg-primary-accent mask-image-logo transition-transform duration-400 ease-out group-hover:rotate-12 group-hover:scale-110"></span>
-            <span className="fade-truncate">VFX Studio</span>
+            <span className="inline-block w-6 h-6 bg-primary-accent logo-mask transition-transform duration-400 ease-out group-hover:rotate-12 group-hover:scale-110"></span>
+            
+            <span>VFX Studio</span>
           </Link>
         </div>
         <nav className="flex-grow overflow-y-auto overflow-x-hidden px-3">
@@ -84,7 +85,6 @@ const NavSectionComponent: React.FC<{ section: NavSection }> = ({ section }) => 
   );
 };
 
-// --- THIS IS THE FIX ---
 const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
   item,
   currentPath,
@@ -100,14 +100,8 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
   const hasChildren = item.children && item.children.length > 0;
   const isParentOfActive = item.children?.some((child) => child.href === currentPath) ?? false;
   
-  // For the server render and the initial client render, the "open" state is determined *only* by the URL.
-  // This guarantees the server and client will match, fixing the hydration error.
   const isInitiallyOpen = isParentOfActive;
-  
-  // Once the component has mounted on the client, we can safely use the client-side state from Zustand.
   const clientIsOpen = openSections[item.title] ?? isInitiallyOpen;
-  
-  // The final `isOpen` state depends on whether the component is mounted.
   const isOpen = isMounted ? clientIsOpen : isInitiallyOpen;
 
   if (isOpen) {

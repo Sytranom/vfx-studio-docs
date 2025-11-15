@@ -9,12 +9,16 @@ import matter from "gray-matter";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypePrettyCode from "rehype-pretty-code";
+import type { Options } from 'rehype-pretty-code';
 
 import Layout from "@/components/Layout";
-import InfoBox from "@/components/InfoBox";
+import Callout from "@/components/Callout";
 import MdxImage from "@/components/MdxImage";
 import PaginationLink from "@/components/PaginationLink";
 import Steps from '@/components/Steps';
+import PropertyReference from "@/components/PropertyReference";
+import Property from "@/components/Property";
+import { Tabs, Tab } from "@/components/Tabs";
 
 import { navigation } from '@/config/siteConfig';
 
@@ -35,7 +39,7 @@ export default function DocsPage({ source, frontMatter, pagination }: DocsPagePr
       description={frontMatter.description}
     >
       <article className="doc-article">
-        <MDXRemote {...source} components={{ InfoBox, img: MdxImage, Steps }} />
+        <MDXRemote {...source} components={{ Callout, img: MdxImage, Steps, PropertyReference, Property, Tabs, Tab }} />
       </article>
 
       <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border-color pt-8">
@@ -58,6 +62,28 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return { paths, fallback: false };
 };
+
+const prettyCodeOptions: Partial<Options> = {
+  theme: {
+    dark: 'github-dark',
+    light: 'github-light',
+  },
+  keepBackground: false,
+  onVisitLine(node) {
+    // Prevent lines from collapsing in `display: grid` mode, and allow empty
+    // lines to be copy/pasted
+    if (node.children.length === 0) {
+      node.children = [{ type: 'text', value: ' ' }];
+    }
+  },
+  onVisitHighlightedLine(node) {
+    node.properties.className.push('highlighted');
+  },
+  onVisitHighlightedWord(node) {
+    node.properties.className = ['highlighted', 'word'];
+  },
+};
+
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params?.slug as string;
@@ -87,13 +113,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         rehypePlugins: [
           rehypeSlug,
           [rehypeAutolinkHeadings, { behavior: "wrap", properties: { className: ['anchor'] } }],
-          [rehypePrettyCode, {
-            theme: {
-              dark: 'github-dark',
-              light: 'github-light',
-            },
-            keepBackground: false,
-          }],
+          [rehypePrettyCode, prettyCodeOptions],
         ],
       },
     });

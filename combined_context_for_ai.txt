@@ -27,6 +27,30 @@
 /ccvf.txt
 
 # ------------------------------
+# File: eslint.config.mjs
+# ------------------------------
+
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
+
+const eslintConfig = [
+  ...nextCoreWebVitals,
+  ...nextTypescript,
+  {
+    ignores: [
+      "node_modules/**",
+      ".next/**",
+      "out/**",
+      "build/**",
+      "next-env.d.ts",
+    ],
+  },
+];
+
+export default eslintConfig;
+
+
+# ------------------------------
 # File: next-env.d.ts
 # ------------------------------
 
@@ -111,7 +135,6 @@ export default withMDX(nextConfig);
   }
 }
 
-
 # ------------------------------
 # File: postcss.config.js
 # ------------------------------
@@ -133,7 +156,7 @@ module.exports = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  darkMode: 'class', 
+  darkMode: 'class',
   theme: {
     extend: {},
   },
@@ -147,7 +170,11 @@ module.exports = {
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -160,12 +187,22 @@ module.exports = {
     "jsx": "preserve",
     "incremental": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/custom.d.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "src/custom.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
+
 
 # ------------------------------
 # File: scripts/generate-search-index.mjs
@@ -467,14 +504,17 @@ const SIZES: TextSizeType[] = ['sm', 'base', 'lg', 'xl'];
 
 const FontSizer = () => {
   const [mounted, setMounted] = useState(false);
+  // Always start with a default state that matches the server.
   const [currentSize, setCurrentSize] = useState<TextSizeType>('base');
 
+  // This effect runs only on the client, after the initial render.
   useEffect(() => {
-    setMounted(true);
+    // Now it's safe to check for the user's persisted setting and update the state.
     const initialSize = document.documentElement.dataset.textSize as TextSizeType | undefined;
     if (initialSize && SIZES.includes(initialSize)) {
       setCurrentSize(initialSize);
     }
+    setMounted(true);
   }, []);
 
   const setSize = (size: TextSizeType) => {
@@ -496,12 +536,16 @@ const FontSizer = () => {
     }
   };
 
-  const canDecrease = currentSize !== 'sm';
-  const canIncrease = currentSize !== 'xl';
-
+  // --- THIS IS THE FIX ---
+  // On the server and during the initial client render, show a static placeholder.
+  // This guarantees that the server and client HTML will match.
   if (!mounted) {
     return <div style={{width: '84px', height: '28px'}} />;
   }
+
+  // After mounting, render the actual interactive component with the correct state.
+  const canDecrease = currentSize !== 'sm';
+  const canIncrease = currentSize !== 'xl';
 
   return (
     <div className="flex items-center gap-1">
@@ -532,13 +576,20 @@ export default FontSizer;
 # File: src/components/Footer.tsx
 # ------------------------------
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 
 const Footer: React.FC = () => {
   const router = useRouter();
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    setYear(new Date().getFullYear());
+  }, []);
   
   const GITHUB_BASE_URL = 'https://github.com/Sytranom/vfx-studio-docs/edit/main';
   const currentPath = router.asPath.split('#')[0];
@@ -560,7 +611,11 @@ const Footer: React.FC = () => {
   return (
     <footer className="w-full text-sm text-text-secondary pt-8 mt-12 border-t border-border-color">
       <div className="flex justify-between items-center">
-        <span>MIT {new Date().getFullYear()} © Sytranom</span>
+        {isMounted ? (
+            <span>MIT {year} © Sytranom</span>
+        ) : (
+            <span>MIT © Sytranom</span>
+        )}
         {editUrl && (
           <a
             href={editUrl}
@@ -718,9 +773,9 @@ export default InfoBox;
 # File: src/components/Layout.tsx
 # ------------------------------
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { motion } from "framer-motion"; // <-- IMPORT
+import { motion } from "framer-motion";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import Toc from "./Toc";
@@ -729,7 +784,7 @@ import Seo from "./Seo";
 import MobileOverlay from "./MobileOverlay";
 import SidebarResizer from "./SidebarResizer";
 import Footer from "./Footer";
-import { useSidebarStore } from "@/hooks/use-sidebar";
+import { useSidebarStore, SIDEBAR_STORAGE_KEY } from "@/hooks/use-sidebar";
 import { useContentWidthStore } from "@/hooks/use-content-width";
 
 interface LayoutProps {
@@ -745,9 +800,24 @@ const Layout: React.FC<LayoutProps> = ({
   title,
   description,
 }) => {
-  const { isOpen, close, width: sidebarWidth } = useSidebarStore();
+  const { isOpen, close, width: sidebarWidth, setWidth } = useSidebarStore();
   const { width: contentWidth } = useContentWidthStore();
   const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    try {
+      const storedValue = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+      if (storedValue) {
+        setWidth(parseInt(storedValue, 10));
+      }
+    } catch (error) {
+      console.error("Failed to hydrate sidebar width from localStorage", error);
+    }
+    // Set mounted to true after the first render cycle
+    setIsMounted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const handleRouteChange = () => {
@@ -766,8 +836,16 @@ const Layout: React.FC<LayoutProps> = ({
   }[contentWidth];
 
   return (
+    // --- THIS IS THE FIX ---
+    // The page starts with opacity-0. Once isMounted is true (after hydration and
+    // setting the correct width), the opacity becomes 100, and it smoothly fades in.
+    // This completely hides any layout flash.
     <div
-      className="relative h-screen bg-bg-surface lg:grid lg:grid-rows-[60px_1fr]"
+      className={`
+        relative h-screen bg-bg-surface lg:grid lg:grid-rows-[60px_1fr]
+        transition-opacity duration-300 ease-in-out
+        ${isMounted ? 'opacity-100' : 'opacity-0'}
+      `}
       style={{ gridTemplateColumns: `${sidebarWidth}px 1fr` }}
     >
       <Seo title={title} description={description} />
@@ -783,9 +861,6 @@ const Layout: React.FC<LayoutProps> = ({
       <main 
         className="bg-bg-main lg:col-start-2 lg:row-start-2 lg:border-t lg:border-l lg:border-border-color lg:rounded-tl-lg overflow-auto min-w-0"
       >
-        {/* --- THIS IS THE FIX --- */}
-        {/* Wrap the content in a motion.div and apply the animation */}
-        {/* The `key` is crucial - it tells Framer Motion to re-animate when the URL changes */}
         <motion.div
           key={router.asPath}
           initial={{ opacity: 0, y: 20 }}
@@ -1116,7 +1191,7 @@ export default Seo;
 # File: src/components/Sidebar.tsx
 # ------------------------------
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -1124,6 +1199,7 @@ import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { motion, AnimatePresence } from "framer-motion";
 import { navigation, NavItem, NavSection } from "@/config/siteConfig";
 import { useSidebarStore } from "@/hooks/use-sidebar";
+import { useNavigationStore } from "@/hooks/use-navigation-store";
 import SidebarResizer from "./SidebarResizer";
 import ThemeSwitcher from "./ThemeSwitcher";
 import WidthToggler from "./WidthToggler";
@@ -1153,8 +1229,11 @@ const Sidebar: React.FC = () => {
       <div className="flex flex-col h-full">
         <div className="h-[60px] flex-shrink-0 flex items-center px-3">
           <Link href="/" className="flex items-center gap-3 text-xl font-semibold text-text-primary no-underline">
-            <span className="inline-block w-6 h-6 bg-primary-accent mask-image-logo transition-transform duration-400 ease-out group-hover:rotate-12 group-hover:scale-110"></span>
-            <span className="fade-truncate">VFX Studio</span>
+            <span className="inline-block w-6 h-6 bg-primary-accent logo-mask transition-transform duration-400 ease-out group-hover:rotate-12 group-hover:scale-110"></span>
+            
+            {/* --- THIS IS THE FIX --- */}
+            {/* Added `flex-grow` to make this span expand and fill the available space */}
+            <span className="flex-grow fade-truncate">VFX Studio</span>
           </Link>
         </div>
         <nav className="flex-grow overflow-y-auto overflow-x-hidden px-3">
@@ -1205,45 +1284,74 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
   item,
   currentPath,
 }) => {
+  const { openSections, toggleSection, setSectionOpen } = useNavigationStore();
+  const [isMounted, setIsMounted] = useState(false);
+  const hasBeenOpened = useRef(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const hasChildren = item.children && item.children.length > 0;
   const isParentOfActive = item.children?.some((child) => child.href === currentPath) ?? false;
   
-  const [isOpen, setIsOpen] = useState(isParentOfActive);
+  const isInitiallyOpen = isParentOfActive;
+  const clientIsOpen = openSections[item.title] ?? isInitiallyOpen;
+  const isOpen = isMounted ? clientIsOpen : isInitiallyOpen;
+
+  if (isOpen) {
+    hasBeenOpened.current = true;
+  }
+
   useEffect(() => {
     if (isParentOfActive) {
-      setIsOpen(true);
+      setSectionOpen(item.title, true);
     }
-  }, [isParentOfActive]);
+  }, [isParentOfActive, item.title, setSectionOpen]);
 
   const handleToggle = (e: React.MouseEvent) => {
     if (hasChildren) {
       if (item.href === "#") e.preventDefault();
-      setIsOpen(prev => !prev);
+      toggleSection(item.title);
     }
   };
 
   const isActive = (!hasChildren && currentPath === item.href) || isParentOfActive;
-  
   const isChildActive = (childHref: string) => currentPath === childHref;
-
   const linkClasses = `flex items-center gap-3.5 w-full py-2.5 px-3 rounded-md no-underline font-medium text-sm transition-colors duration-200 ease-in-out relative cursor-pointer select-none
     ${isActive ? 'bg-primary-accent/10 text-text-primary' : 'text-text-secondary hover:bg-bg-inset hover:text-text-primary'}
   `;
+
+  const variants = {
+    open: { height: "auto", opacity: 1 },
+    closed: { height: 0, opacity: 0 },
+  };
 
   return (
     <li className="list-none">
       <Link href={item.href || "#"} className={linkClasses} onClick={handleToggle}>
         {item.icon && (<span className="w-4 grid place-items-center"><FontAwesomeIcon icon={item.icon} /></span>)}
         <span className="flex-grow fade-truncate">{item.title}</span>
-        {hasChildren && (<FontAwesomeIcon icon={faChevronRight} className={`ml-auto transition-transform duration-300 ${isOpen ? "rotate-90" : ""}`} />)}
+        {hasChildren && (
+          <FontAwesomeIcon
+            icon={faChevronRight}
+            className={`
+              ml-auto duration-300
+              ${isOpen ? "rotate-90" : ""}
+              ${isMounted ? "transition-transform" : ""}
+            `}
+          />
+        )}
       </Link>
       <AnimatePresence initial={false}>
         {isOpen && hasChildren && (
           <motion.ul
             className="list-none overflow-hidden"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            key="content"
+            initial={hasBeenOpened.current ? "open" : "closed"}
+            animate="open"
+            exit="closed"
+            variants={variants}
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
             {item.children?.map((child) => (
@@ -1414,37 +1522,91 @@ interface Heading {
   level: number;
 }
 
+// Helper to determine heading level from its tag name
+const getHeadingLevel = (tagName: string): number => {
+  if (tagName === "H1") return 1;
+  if (tagName === "H2") return 2;
+  return 3;
+};
+
 const Toc: React.FC = () => {
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [activeId, setActiveId] = useState<string>("");
   const router = useRouter();
-  const observer = useRef<IntersectionObserver | null>(null);
+  const headingsRef = useRef<HTMLElement[]>([]);
 
+  // Effect to gather all headings (including the main H1) on page change
   useEffect(() => {
-    if (observer.current) observer.current.disconnect();
-
-    const handleObserver = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) setActiveId(entry.target.id);
-      });
-    };
-
-    observer.current = new IntersectionObserver(handleObserver, { rootMargin: "-20% 0% -80% 0px", threshold: 1.0 });
-
-    const headingElements = Array.from(document.querySelectorAll<HTMLElement>(".doc-article h2, .doc-article h3"));
-    setHeadings(
-      headingElements.map((h) => {
-        if(observer.current) observer.current.observe(h);
-        return { id: h.id, text: h.textContent || "", level: h.tagName === "H2" ? 2 : 3 };
-      })
+    const headingElements = Array.from(
+      document.querySelectorAll<HTMLElement>(".doc-article h1, .doc-article h2, .doc-article h3")
     );
     
-    return () => {
-        if (observer.current) observer.current.disconnect();
-    }
+    headingsRef.current = headingElements;
+    const newHeadings = headingElements.map((h) => ({
+      id: h.id,
+      text: h.textContent || "",
+      level: getHeadingLevel(h.tagName),
+    }));
+    
+    setHeadings(newHeadings);
+    
+    // Initially activate the first heading (the title)
+    setActiveId(newHeadings[0]?.id || "");
+
   }, [router.asPath]);
 
-  if (headings.length === 0) {
+  // Effect to handle scroll-based highlighting
+  useEffect(() => {
+    const scrollContainer = document.querySelector('main');
+    if (!scrollContainer || headings.length === 0) return;
+    
+    let timeoutId: number | null = null;
+    
+    const handleScroll = () => {
+      // --- FIX 1: When scrolled to the very bottom, highlight the last item ---
+      const isAtBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 20;
+      if (isAtBottom) {
+        const lastHeadingId = headingsRef.current[headingsRef.current.length - 1]?.id;
+        if (lastHeadingId) {
+            setActiveId(lastHeadingId);
+            return;
+        }
+      }
+
+      // --- FIX 2: Find the highest heading visible on the screen ---
+      const TOP_OFFSET = 100; // Offset for the sticky header
+      let currentBestId = headingsRef.current[0]?.id || ""; // Default to the first heading
+
+      // Iterate backwards to find the last heading that has passed the offset
+      for (const heading of [...headingsRef.current].reverse()) {
+        if (heading.getBoundingClientRect().top < TOP_OFFSET) {
+          currentBestId = heading.id;
+          break;
+        }
+      }
+      setActiveId(currentBestId);
+    };
+    
+    const throttledScrollHandler = () => {
+      if (timeoutId === null) {
+        timeoutId = window.setTimeout(() => {
+          handleScroll();
+          timeoutId = null;
+        }, 100);
+      }
+    };
+    
+    scrollContainer.addEventListener('scroll', throttledScrollHandler);
+    handleScroll(); // Run once on mount
+
+    return () => {
+      scrollContainer.removeEventListener('scroll', throttledScrollHandler);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [headings]); // Re-run this effect when the page's headings change
+
+  // Don't render the ToC if there's only a title and no subheadings
+  if (headings.length < 2) {
     return null;
   }
 
@@ -1457,20 +1619,25 @@ const Toc: React.FC = () => {
         <FontSizer />
       </div>
       <ul className="space-y-2 border-l-2 border-border-color">
-        {headings.map((h) => (
-          <li key={h.id}>
-            <a
-              href={`#${h.id}`}
-              className={`
-                block py-1 -ml-0.5 text-sm no-underline border-l-2 transition-all duration-200
-                ${h.level === 2 ? "pl-4" : "pl-8"}
-                ${activeId === h.id ? "font-semibold text-primary-accent border-primary-accent" : "text-text-secondary border-transparent hover:text-text-primary hover:border-text-secondary"}
-              `}
-            >
-              {h.text}
-            </a>
-          </li>
-        ))}
+        {headings.map((h) => {
+          // Don't show the main page title (H1) in the list itself
+          if (h.level === 1) return null;
+          
+          return (
+            <li key={h.id}>
+              <a
+                href={`#${h.id}`}
+                className={`
+                  block py-1 -ml-0.5 text-sm no-underline border-l-2 transition-all duration-200
+                  ${h.level === 2 ? "pl-4" : "pl-8"}
+                  ${activeId === h.id ? "font-semibold text-primary-accent border-primary-accent" : "text-text-secondary border-transparent hover:text-text-primary hover:border-text-secondary"}
+                `}
+              >
+                {h.text}
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
@@ -1605,6 +1772,37 @@ export const useContentWidthStore = create<ContentWidthState>((set) => ({
 }));
 
 # ------------------------------
+# File: src/hooks/use-navigation-store.ts
+# ------------------------------
+
+import { create } from 'zustand';
+
+interface NavigationState {
+  openSections: Record<string, boolean>;
+  toggleSection: (title: string) => void;
+  setSectionOpen: (title: string, isOpen: boolean) => void;
+}
+
+export const useNavigationStore = create<NavigationState>((set) => ({
+  openSections: {},
+  toggleSection: (title) => set((state) => ({
+    openSections: {
+      ...state.openSections,
+      [title]: !state.openSections[title],
+    },
+  })),
+  setSectionOpen: (title, isOpen) => set((state) => {
+    if (state.openSections[title] === isOpen) return state; // Avoid unnecessary updates
+    return {
+      openSections: {
+        ...state.openSections,
+        [title]: isOpen,
+      },
+    };
+  }),
+}));
+
+# ------------------------------
 # File: src/hooks/use-sidebar.ts
 # ------------------------------
 
@@ -1620,14 +1818,25 @@ interface SidebarState {
 
 const SIDEBAR_MIN_WIDTH = 180;
 const SIDEBAR_MAX_WIDTH = 480;
+export const SIDEBAR_STORAGE_KEY = 'vfx-studio-docs-sidebar-width';
 
 export const useSidebarStore = create<SidebarState>((set) => ({
   isOpen: false,
-  width: 280,
+  width: 280, // <-- Always initialize with a static default for SSR.
   toggle: () => set((state) => ({ isOpen: !state.isOpen })),
   close: () => set({ isOpen: false }),
   setWidth: (newWidth: number) => set(() => {
     const clampedWidth = Math.max(SIDEBAR_MIN_WIDTH, Math.min(newWidth, SIDEBAR_MAX_WIDTH));
+    
+    // Persist to localStorage on the client side whenever width changes.
+    if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(SIDEBAR_STORAGE_KEY, clampedWidth.toString());
+        } catch (error) {
+          console.error("Failed to save sidebar width to localStorage", error);
+        }
+    }
+    
     return { width: clampedWidth };
   }),
 }));
@@ -1845,7 +2054,12 @@ import { Html, Head, Main, NextScript } from "next/document";
 
 export default function Document() {
   return (
-    <Html lang="en">
+    // --- THIS IS THE FIX ---
+    // The suppressHydrationWarning prop tells React to ignore unavoidable
+    // differences in attributes on the <html> tag. This is the standard and
+    // recommended way to fix hydration errors caused by theme-switching
+    // libraries like next-themes.
+    <Html lang="en" suppressHydrationWarning>
       <Head />
       <body>
         <Main />
@@ -2042,7 +2256,6 @@ export default function YourFirstEffectPage() {
 # File: src/styles/globals.css
 # ------------------------------
 
-
 @import "tailwindcss";
 
 @theme {
@@ -2052,14 +2265,14 @@ export default function YourFirstEffectPage() {
   --color-primary-accent: #6366f1;
   
   /* --- Dark Theme Palette (Deeper & More Neutral) --- */
-  --color-bg-main-dark: #121212;        /* A very deep, near-black for content */
-  --color-bg-surface-dark: #1a1a1a;     /* A slightly lighter gray for UI surfaces */
-  --color-bg-inset-dark: #282828;      /* A soft gray for hovered items */
-  --color-border-color-dark: #363636;   /* A subtle border to define edges */
+  --color-bg-main-dark: #121212;
+  --color-bg-surface-dark: #1a1a1a;
+  --color-bg-inset-dark: #282828;
+  --color-border-color-dark: #363636;
 
-  --color-text-primary-dark: #e5e5e5;    /* A softer, bright gray for readability */
-  --color-text-secondary-dark: #888888;  /* A neutral gray for secondary info */
-  --color-text-on-accent-dark: #ffffff;  /* Pure white for max contrast on buttons */
+  --color-text-primary-dark: #e5e5e5;
+  --color-text-secondary-dark: #888888;
+  --color-text-on-accent-dark: #ffffff;
 
   /* --- Light Theme Palette (Clean & Neutral) --- */
   --color-bg-main-light: #ffffff;
@@ -2221,19 +2434,28 @@ export default function YourFirstEffectPage() {
   @apply text-sm text-text-secondary;
 }
 
+/* src/styles/globals.css */
+
+/* ... (all your other CSS code) ... */
+
 /* --- FADE TRUNCATE UTILITY (IMPROVED) --- */
 .fade-truncate {
   white-space: nowrap;
   overflow: hidden;
-  /* 
-    This is the fix:
-    Instead of a percentage, we tell the mask to be solid up until the
-    last 30 pixels, and then fade to transparent over those 30 pixels.
-    This ensures the fade is always a consistent size and visible,
-    even when the sidebar is very narrow.
-  */
   -webkit-mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%);
   mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%);
+}
+
+/* --- ADD THIS NEW CLASS FOR THE LOGO --- */
+.logo-mask {
+  -webkit-mask-image: url('/logo.png');
+  mask-image: url('/logo.png');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 
 # ------------------------------
