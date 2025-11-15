@@ -2,80 +2,80 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/guides</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs/guides</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/tutorials</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs/tutorials</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/docs/advanced-scripting</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs/docs/advanced-scripting</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/docs/networking-basics</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs/docs/networking-basics</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/docs/performance-tuning</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs/docs/performance-tuning</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/docs/reference-advanced</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs/docs/reference-advanced</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/docs/reference-bezier</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs/docs/reference-bezier</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/docs/reference-keybinds</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs/docs/reference-keybinds</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/docs/reference-sliders</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs/docs/reference-sliders</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/docs/replication-strategies</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs/docs/replication-strategies</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/guides/camera-shake</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs/guides/camera-shake</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
     <url>
-      <loc>https://vfx-studio-docs.sytranom.com/tutorials/your-first-effect</loc>
-      <lastmod>2025-11-15T15:29:06.809Z</lastmod>
+      <loc>https://sytranom.github.io/vfx-studio-docs/tutorials/your-first-effect</loc>
+      <lastmod>2025-11-15T15:34:34.390Z</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
     </url>
