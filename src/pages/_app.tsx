@@ -29,6 +29,8 @@ const { title = '', breadcrumbs = '', description = '' } = pageProps;
         <Head>
           {}
           <title>VFX Studio Documentation</title>
+          {}
+          <meta name="google-site-verification" content="Tr8tL3vHkL0x5dFoV5_F-ltejyJRotA2yy1sPgNmWUU" />
         </Head>
         {}
         <Layout
