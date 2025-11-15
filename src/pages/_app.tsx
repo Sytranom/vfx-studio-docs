@@ -27,12 +27,13 @@ const { title = '', breadcrumbs = '', description = '' } = pageProps;
     <ThemeProvider attribute="class" defaultTheme="system">
       <div className={`${inter.variable} ${jetbrains_mono.variable}`}>
         <Head>
-          {}
           <title>VFX Studio Documentation</title>
-          {}
+
           <meta name="google-site-verification" content="Tr8tL3vHkL0x5dFoV5_F-ltejyJRotA2yy1sPgNmWUU" />
+          
+          <meta name="algolia-site-verification" content="8C3087949523F62B" />
         </Head>
-        {}
+        
         <Layout
           title={title}
           breadcrumbs={breadcrumbs}
