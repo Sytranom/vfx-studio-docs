@@ -4,8 +4,6 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import Dropdown from './Dropdown';
 import { motion, Easing } from 'framer-motion';
 
-// --- Constants and Helper Functions ---
-
 interface EasingOption {
   value: string;
   label: string;

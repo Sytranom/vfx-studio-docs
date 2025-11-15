@@ -1,11 +1,13 @@
 import React from 'react';
 
-import Info from 'lucide-react/dist/esm/icons/info';
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
-import XCircle from 'lucide-react/dist/esm/icons/x-circle';
-import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
-import Lightbulb from 'lucide-react/dist/esm/icons/lightbulb';
-import type { LucideIcon } from 'lucide-react';
+import {
+  Info,
+  AlertTriangle,
+  XCircle,
+  CheckCircle,
+  Lightbulb,
+  LucideIcon
+} from 'lucide-react';
 
 type CalloutType = 'info' | 'warning' | 'danger' | 'success' | 'tip';
 
