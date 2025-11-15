@@ -12,10 +12,23 @@ interface EasingOption {
 }
 
 const parseBezierForMotion = (css: string): Easing => {
-  if (css === 'linear') return 'linear';
+  if (css === 'linear') {
+    return 'linear';
+  }
   const match = css.match(/cubic-bezier\(([^)]+)\)/);
-  if (!match) return 'linear';
-  return match[1].split(',').map(parseFloat) as Easing;
+  if (!match) {
+    return 'linear'; 
+  }
+
+  const numbers = match[1].split(',').map(s => parseFloat(s.trim()));
+
+if (numbers.length === 4 && numbers.every(n => !isNaN(n))) {
+    
+    return numbers as [number, number, number, number];
+  }
+
+console.warn(`Invalid cubic-bezier string found: "${css}". Falling back to linear.`);
+  return 'linear';
 };
 
 const EASING_OPTIONS: EasingOption[] = [
@@ -74,7 +87,6 @@ const EasingVisualizer: React.FC = () => {
           border: 1px solid var(--color-border-color);
           border-radius: 0.5rem;
           overflow: hidden;
-          /* THIS IS THE FIX: Removed margin-top and margin-bottom */
         }
         .easing-visualizer__header {
           padding: 0.75rem 1rem;
@@ -145,7 +157,7 @@ const EasingVisualizer: React.FC = () => {
                     ease: currentEase.motionValue,
                     repeat: Infinity,
                     repeatType: "loop",
-                    repeatDelay: 1 
+                    repeatDelay: 1
                   }}
                 />
               )}

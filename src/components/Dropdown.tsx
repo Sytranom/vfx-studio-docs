@@ -51,9 +51,8 @@ const Dropdown: React.FC<DropdownProps> = ({ options, selectedValue, onSelect, l
         </button>
         <AnimatePresence>
           {isOpen && (
-            // FIX #1: Changed motion.ul to motion.div and added role="list".
-            // This prevents it from being targeted by the global ".doc-article ul" style.
-            <motion.div
+
+<motion.div
               role="list"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -64,9 +63,8 @@ const Dropdown: React.FC<DropdownProps> = ({ options, selectedValue, onSelect, l
               {options.map((option) => {
                 const isSelected = option.value === selectedValue;
                 return (
-                  // FIX #2: Changed li to div and added role="listitem".
-                  // This makes it semantically correct and avoids global "li" styles.
-                  <div
+
+<div
                     key={option.value}
                     role="listitem"
                     onClick={() => handleSelect(option.value)}
