@@ -39,9 +39,9 @@ const Layout: React.FC<LayoutProps> = ({
     } catch (error) {
       console.error("Failed to hydrate sidebar width from localStorage", error);
     }
-    // Set mounted to true after the first render cycle
+    
     setIsMounted(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   useEffect(() => {
@@ -61,11 +61,8 @@ const Layout: React.FC<LayoutProps> = ({
   }[contentWidth];
 
   return (
-    // --- THIS IS THE FIX ---
-    // The page starts with opacity-0. Once isMounted is true (after hydration and
-    // setting the correct width), the opacity becomes 100, and it smoothly fades in.
-    // This completely hides any layout flash.
-    <div
+
+<div
       className={`
         relative h-screen bg-bg-surface lg:grid lg:grid-rows-[60px_1fr]
         transition-opacity duration-300 ease-in-out

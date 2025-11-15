@@ -8,7 +8,6 @@ interface Heading {
   level: number;
 }
 
-// Helper to determine heading level from its tag name
 const getHeadingLevel = (tagName: string): number => {
   if (tagName === "H1") return 1;
   if (tagName === "H2") return 2;
@@ -21,8 +20,7 @@ const Toc: React.FC = () => {
   const router = useRouter();
   const headingsRef = useRef<HTMLElement[]>([]);
 
-  // Effect to gather all headings (including the main H1) on page change
-  useEffect(() => {
+useEffect(() => {
     const headingElements = Array.from(
       document.querySelectorAll<HTMLElement>(".doc-article h1, .doc-article h2, .doc-article h3")
     );
@@ -35,21 +33,19 @@ const Toc: React.FC = () => {
     }));
     
     setHeadings(newHeadings);
-    
-    // Initially activate the first heading (the title)
-    setActiveId(newHeadings[0]?.id || "");
+
+setActiveId(newHeadings[0]?.id || "");
 
   }, [router.asPath]);
 
-  // Effect to handle scroll-based highlighting
-  useEffect(() => {
+useEffect(() => {
     const scrollContainer = document.querySelector('main');
     if (!scrollContainer || headings.length === 0) return;
     
     let timeoutId: number | null = null;
     
     const handleScroll = () => {
-      // --- FIX 1: When scrolled to the very bottom, highlight the last item ---
+      
       const isAtBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 20;
       if (isAtBottom) {
         const lastHeadingId = headingsRef.current[headingsRef.current.length - 1]?.id;
@@ -59,12 +55,10 @@ const Toc: React.FC = () => {
         }
       }
 
-      // --- FIX 2: Find the highest heading visible on the screen ---
-      const TOP_OFFSET = 100; // Offset for the sticky header
-      let currentBestId = headingsRef.current[0]?.id || ""; // Default to the first heading
+const TOP_OFFSET = 100; 
+      let currentBestId = headingsRef.current[0]?.id || ""; 
 
-      // Iterate backwards to find the last heading that has passed the offset
-      for (const heading of [...headingsRef.current].reverse()) {
+for (const heading of [...headingsRef.current].reverse()) {
         if (heading.getBoundingClientRect().top < TOP_OFFSET) {
           currentBestId = heading.id;
           break;
@@ -83,16 +77,15 @@ const Toc: React.FC = () => {
     };
     
     scrollContainer.addEventListener('scroll', throttledScrollHandler);
-    handleScroll(); // Run once on mount
+    handleScroll(); 
 
     return () => {
       scrollContainer.removeEventListener('scroll', throttledScrollHandler);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [headings]); // Re-run this effect when the page's headings change
+  }, [headings]); 
 
-  // Don't render the ToC if there's only a title and no subheadings
-  if (headings.length < 2) {
+if (headings.length < 2) {
     return null;
   }
 
@@ -106,7 +99,7 @@ const Toc: React.FC = () => {
       </div>
       <ul className="space-y-2 border-l-2 border-border-color">
         {headings.map((h) => {
-          // Don't show the main page title (H1) in the list itself
+          
           if (h.level === 1) return null;
           
           return (

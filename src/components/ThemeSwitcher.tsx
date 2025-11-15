@@ -17,7 +17,7 @@ const ThemeSwitcher = () => {
   };
 
   if (!mounted) {
-    // Render a placeholder to prevent layout shift
+    
     return <div className="w-9 h-9" />;
   }
 

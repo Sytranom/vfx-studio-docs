@@ -1,6 +1,5 @@
 import React from 'react';
-// --- FIX for the server error ---
-// Changed to direct imports to avoid bundler issues with the library's main entry point.
+
 import Info from 'lucide-react/dist/esm/icons/info';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import XCircle from 'lucide-react/dist/esm/icons/x-circle';

@@ -15,7 +15,7 @@ export const useNavigationStore = create<NavigationState>((set) => ({
     },
   })),
   setSectionOpen: (title, isOpen) => set((state) => {
-    if (state.openSections[title] === isOpen) return state; // Avoid unnecessary updates
+    if (state.openSections[title] === isOpen) return state; 
     return {
       openSections: {
         ...state.openSections,

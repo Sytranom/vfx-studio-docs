@@ -9,7 +9,7 @@ interface SearchDoc {
   slug: string;
   title: string;
   breadcrumbs: string;
-  content: string; // Add content to the type
+  content: string; 
 }
 
 const SearchModal: React.FC = () => {
@@ -31,12 +31,11 @@ const SearchModal: React.FC = () => {
     const searchIndex = new FlexSearch.Document<SearchDoc, true>({
         document: {
             id: "id",
-            // --- THIS IS THE FIX ---
-            // We now index the title, breadcrumbs, AND the full content.
-            index: ["title", "breadcrumbs", "content"],
+
+index: ["title", "breadcrumbs", "content"],
             store: true,
         },
-        tokenize: "full" // Use 'full' tokenization for better content matching
+        tokenize: "full" 
     });
 
     fetch("/search.json")
@@ -119,8 +118,8 @@ const SearchModal: React.FC = () => {
                     <li key={result.id}>
                         <Link href={result.slug} onClick={closeModal} className="block p-4 hover:bg-bg-inset border-b border-border-color">
                             <div className="font-medium text-text-primary">{result.title}</div>
-                            {/* We no longer show breadcrumbs here to keep it clean */}
-                            {/* Instead, a snippet from the content could be shown in the future */}
+                            {}
+                            {}
                         </Link>
                     </li>
                 ))}

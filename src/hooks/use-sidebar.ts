@@ -14,14 +14,13 @@ export const SIDEBAR_STORAGE_KEY = 'vfx-studio-docs-sidebar-width';
 
 export const useSidebarStore = create<SidebarState>((set) => ({
   isOpen: false,
-  width: 280, // <-- Always initialize with a static default for SSR.
+  width: 280, 
   toggle: () => set((state) => ({ isOpen: !state.isOpen })),
   close: () => set({ isOpen: false }),
   setWidth: (newWidth: number) => set(() => {
     const clampedWidth = Math.max(SIDEBAR_MIN_WIDTH, Math.min(newWidth, SIDEBAR_MAX_WIDTH));
-    
-    // Persist to localStorage on the client side whenever width changes.
-    if (typeof window !== 'undefined') {
+
+if (typeof window !== 'undefined') {
         try {
           localStorage.setItem(SIDEBAR_STORAGE_KEY, clampedWidth.toString());
         } catch (error) {

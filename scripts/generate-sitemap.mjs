@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 async function generateSitemap() {
-  const siteUrl = 'https://sytranom.github.io/vfx-studio-docs';
+  const siteUrl = 'https://vfx-studio-docs.sytranom.com'; // Example URL, replace if needed
   const publicDir = path.join(process.cwd(), 'public');
   
   const staticPages = (await fs.readdir(path.join(process.cwd(), 'src/pages')))

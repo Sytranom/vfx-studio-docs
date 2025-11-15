@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
     setYear(new Date().getFullYear());
   }, []);
   
-  const GITHUB_BASE_URL = 'https://github.com/Sytranom/vfx-studio-docs/edit/main';
+  const GITHUB_BASE_URL = 'https://github.com/Sytranom/vfx-studio-docs-2/edit/main';
   const currentPath = router.asPath.split('#')[0];
   let fileToEdit = '';
 

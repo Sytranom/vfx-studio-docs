@@ -70,8 +70,6 @@ const prettyCodeOptions: Partial<Options> = {
   },
   keepBackground: false,
   onVisitLine(node) {
-    // Prevent lines from collapsing in `display: grid` mode, and allow empty
-    // lines to be copy/pasted
     if (node.children.length === 0) {
       node.children = [{ type: 'text', value: ' ' }];
     }
@@ -83,7 +81,6 @@ const prettyCodeOptions: Partial<Options> = {
     node.properties.className = ['highlighted', 'word'];
   },
 };
-
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params?.slug as string;
