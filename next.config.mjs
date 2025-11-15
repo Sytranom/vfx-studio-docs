@@ -8,8 +8,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // comment out the basePath line when working locally
-  // basePath: '/vfx-studio-docs', 
+  // comment the basePath line when working locally
+  basePath: '/vfx-studio-docs', 
 };
 
 export default withMDX(nextConfig);
