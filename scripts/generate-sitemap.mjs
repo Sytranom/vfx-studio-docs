@@ -2,7 +2,8 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 async function generateSitemap() {
-  const siteUrl = 'https://vfx-studio-docs.sytranom.com'; 
+  const siteUrl = 'https://sytranom.github.io'; 
+  const basePath = '/vfx-studio-docs'; // This is from your next.config.mjs
   const publicDir = path.join(process.cwd(), 'public');
   
   const staticPages = (await fs.readdir(path.join(process.cwd(), 'src/pages')))
@@ -21,14 +22,14 @@ async function generateSitemap() {
     .map(file => `/tutorials/${file.replace('.tsx', '')}`);
 
   const allPaths = [...staticPages, ...docPages, ...guidePages, ...tutorialPages]
-    .map(p => p === '/index' ? '/' : p);
+    .map(p => p === '/index' ? '' : p); // Handle index route correctly
   
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   ${allPaths
     .map(url => `
     <url>
-      <loc>${siteUrl}${url}</loc>
+      <loc>${siteUrl}${basePath}${url}</loc>
       <lastmod>${new Date().toISOString()}</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
@@ -37,7 +38,7 @@ async function generateSitemap() {
 </urlset>`;
 
   await fs.writeFile(path.join(publicDir, 'sitemap.xml'), sitemap);
-  console.log('✅ Sitemap generated successfully!');
+  console.log('✅ Sitemap generated successfully with correct github.io URLs!');
 }
 
 generateSitemap();

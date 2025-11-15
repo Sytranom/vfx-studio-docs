@@ -10,11 +10,11 @@ const Seo: React.FC<SeoProps> = ({ title, description }) => {
   const router = useRouter();
   const siteTitle = "VFX Studio Docs";
   const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
-  const siteUrl = "https://vfx-studio-docs.sytranom.com"; // Use the single canonical URL
+  const siteUrl = "https://sytranom.github.io/vfx-studio-docs"; // CORRECT URL
   const canonicalUrl = siteUrl + (router.asPath === "/" ? "" : router.asPath).split('?')[0];
   const defaultDescription = "The official documentation for VFX Studio, an all-in-one toolkit for Roblox developers.";
   const pageDescription = description || defaultDescription;
-  const imageUrl = `${siteUrl}/default-og-image.png`; // You should create a default social media image
+  const imageUrl = `${siteUrl}/default-og-image.png`;
 
   return (
     <Head>
