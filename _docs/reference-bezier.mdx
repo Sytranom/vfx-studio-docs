@@ -12,9 +12,19 @@ The Curve Editor is your go-to tool for creating fluid, natural-looking animatio
 
 It uses Bezier curves, which allow you to define a smooth path between two points using control handles. This gives you precise control over acceleration and deceleration, making your animations feel polished and professional.
 
-- **Control Points:** These are the main points on the graph that define the value of a property at a specific time. You can add a new point by `Ctrl+Clicking` on the graph canvas.
-- **Tangents:** Each control point has two tangent handles that control the shape of the curve entering and leaving the point. Dragging these handles changes the easing of the animation.
-- **Time & Value:** The horizontal axis (X) represents the normalized lifetime of the effect (from 0 to 1), and the vertical axis (Y) represents the property's value.
+<h2 id="core-concepts">Core Concepts</h2>
+The editor is built around a few key ideas. Understanding these will help you master animation curves quickly.
+
+<h3 id="control-points">Control Points</h3>
+These are the main points on the graph that define the value of a property at a specific time. You can add a new point by `Ctrl+Clicking` on the graph canvas.
+
+<h3 id="tangent-handles">Tangent Handles</h3>
+Each control point has two tangent handles that control the shape of the curve entering and leaving the point. Dragging these handles changes the easing of the animation.
+
+<h3 id="graph-axes">Graph Axes</h3>
+The horizontal axis (X) represents the normalized lifetime of the effect (from 0 to 1), and the vertical axis (Y) represents the property's value.
+
+<h2 id="usage-and-examples">Usage and Examples</h2>
 
 <Tabs>
   <Tab title="Lua API Example">
@@ -45,6 +55,9 @@ It uses Bezier curves, which allow you to define a smooth path between two point
   </Tab>
 </Tabs>
 
+<h2 id="curve-properties">Curve Properties</h2>
+These properties control the overall behavior of the curve itself.
+
 <PropertyReference>
   <Property name="Tension" type="number" defaultValue="0.5">
     Controls the overall 'tightness' of the curve around its control points. Higher values create a more pronounced curve, while lower values result in a gentler slope.
@@ -59,4 +72,3 @@ It uses Bezier curves, which allow you to define a smooth path between two point
     - `PingPong`: The animation plays forwards, then backwards, then forwards again.
   </Property>
 </PropertyReference>
-```

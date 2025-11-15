@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+// The import for EasingVisualizer.css should be removed from here
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { config } from "@fortawesome/fontawesome-svg-core";

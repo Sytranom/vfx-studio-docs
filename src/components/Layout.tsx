@@ -7,7 +7,6 @@ import Toc from "./Toc";
 import SearchModal from "./SearchModal";
 import Seo from "./Seo";
 import MobileOverlay from "./MobileOverlay";
-import SidebarResizer from "./SidebarResizer";
 import Footer from "./Footer";
 import { useSidebarStore, SIDEBAR_STORAGE_KEY } from "@/hooks/use-sidebar";
 import { useContentWidthStore } from "@/hooks/use-content-width";
@@ -74,10 +73,6 @@ const Layout: React.FC<LayoutProps> = ({
       <Sidebar />
       <MobileOverlay isSidebarOpen={isOpen} onClick={close} />
       
-      <div className="hidden lg:block">
-        <SidebarResizer />
-      </div>
-
       <Header breadcrumbs={breadcrumbs} />
 
       <main 

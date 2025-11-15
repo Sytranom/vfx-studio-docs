@@ -19,6 +19,7 @@ import Steps from '@/components/Steps';
 import PropertyReference from "@/components/PropertyReference";
 import Property from "@/components/Property";
 import { Tabs, Tab } from "@/components/Tabs";
+import EasingVisualizer from "@/components/EasingVisualizer";
 
 import { navigation } from '@/config/siteConfig';
 
@@ -39,7 +40,19 @@ export default function DocsPage({ source, frontMatter, pagination }: DocsPagePr
       description={frontMatter.description}
     >
       <article className="doc-article">
-        <MDXRemote {...source} components={{ Callout, img: MdxImage, Steps, PropertyReference, Property, Tabs, Tab }} />
+        <MDXRemote 
+          {...source} 
+          components={{ 
+            Callout, 
+            img: MdxImage, 
+            Steps, 
+            PropertyReference, 
+            Property, 
+            Tabs, 
+            Tab,
+            EasingVisualizer 
+          }} 
+        />
       </article>
 
       <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border-color pt-8">
