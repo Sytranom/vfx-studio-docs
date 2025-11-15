@@ -4,9 +4,9 @@ import FeatureSection from "@/components/FeatureSection";
 export async function getStaticProps() {
   return {
     props: {
-      title: "Home",
+      title: "VFX Studio: The All-in-One Roblox VFX Plugin",
       breadcrumbs: "Home",
-      description: "VFX Studio is an all-in-one toolkit for Roblox developers to design, manage, and deploy stunning visual effects.",
+      description: "The official documentation for VFX Studio, an all-in-one toolkit for Roblox developers to design, manage, and deploy stunning visual effects.",
     },
   };
 }
@@ -17,10 +17,10 @@ export default function HomePage() {
     <>
       <div className="text-center pb-12">
         <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-text-primary to-text-secondary bg-clip-text text-transparent">
-          Create Breathtaking Visual Effects
+          Create Breathtaking VFX for Roblox
         </h1>
         <p className="text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed">
-          VFX Studio is an all-in-one toolkit for Roblox developers and artists
+          VFX Studio is an all-in-one plugin for Roblox Studio, built for developers and artists
           to design, manage, and deploy stunning visual effects in real-time.
         </p>
         <div className="flex justify-center gap-4 mt-8">
@@ -37,19 +37,19 @@ export default function HomePage() {
         <FeatureSection
           title="Iterate in Real-Time"
           imageUrl="/input_file_0.png"
-          imageAlt="Emitter and Sliders Panel"
+          imageAlt="The Emitter and Sliders Panel in VFX Studio for Roblox."
           imageWidth={400}
           imageHeight={550}
         >
           Stop guessing. Tweak colors, retiming, scale, and emitter
           properties with live-updating floating panels. See your changes
-          instantly in Studio, cutting your development time drastically.
+          instantly in Roblox Studio, cutting your development time drastically.
         </FeatureSection>
 
         <FeatureSection
           title="Unleash Complex Animations"
           imageUrl="/input_file_1.png"
-          imageAlt="Bezier Curve Editor"
+          imageAlt="The powerful Bezier Curve Editor for creating fluid animations."
           imageWidth={500}
           imageHeight={450}
           reverse={true}
@@ -63,7 +63,7 @@ export default function HomePage() {
         <FeatureSection
           title="A Comprehensive Asset Library"
           imageUrl="/input_file_2.png"
-          imageAlt="Asset Library"
+          imageAlt="The built-in Asset Library with thousands of textures and meshes."
           imageWidth={400}
           imageHeight={600}
         >

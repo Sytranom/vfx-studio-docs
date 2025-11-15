@@ -9,12 +9,12 @@ interface SeoProps {
 const Seo: React.FC<SeoProps> = ({ title, description }) => {
   const router = useRouter();
   const siteTitle = "VFX Studio Docs";
-  const fullTitle = `${title} | ${siteTitle}`;
-  const siteUrl = "https://sytranom.github.io/vfx-studio-docs";
+  const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
+  const siteUrl = "https://vfx-studio-docs.sytranom.com"; // Use the single canonical URL
   const canonicalUrl = siteUrl + (router.asPath === "/" ? "" : router.asPath).split('?')[0];
   const defaultDescription = "The official documentation for VFX Studio, an all-in-one toolkit for Roblox developers.";
   const pageDescription = description || defaultDescription;
-  const imageUrl = `${siteUrl}/default-og-image.png`;
+  const imageUrl = `${siteUrl}/default-og-image.png`; // You should create a default social media image
 
   return (
     <Head>
