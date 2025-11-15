@@ -10,7 +10,6 @@ import React from 'react';
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
-import Layout from "@/components/Layout";
 import Callout from "@/components/Callout";
 import MdxImage from "@/components/MdxImage";
 import PaginationLink from "@/components/PaginationLink";
@@ -21,36 +20,40 @@ import { Tabs, Tab } from "@/components/Tabs";
 import EasingVisualizer from "@/components/EasingVisualizer";
 import CodeBlock from "@/components/CodeBlock";
 import ClientOnly from "@/components/ClientOnly";
+import Keybind from "@/components/Keybind";
+import { FileTree, Folder, File } from "@/components/FileTree";
+import Highlight from "@/components/Highlight";
 
 import { navigation } from '@/config/siteConfig';
 
 interface DocsPageProps {
   source: MDXRemoteSerializeResult;
-  frontMatter: { [key: string]: any };
+  
   pagination: {
     prev: { title: string; href: string } | null;
     next: { title: string; href: string } | null;
   };
 }
 
-export default function DocsPage({ source, frontMatter, pagination }: DocsPageProps) {
+export default function DocsPage({ source, pagination }: DocsPageProps) {
   return (
-    <Layout
-      breadcrumbs={frontMatter.breadcrumbs || "Docs"}
-      title={frontMatter.title || "Docs"}
-      description={frontMatter.description}
-    >
+    <>
       <article className="doc-article">
         <MDXRemote
           {...source}
-          components={{
-            Callout,
-            img: MdxImage,
-            Steps,
-            PropertyReference,
-            Property,
-            Tabs,
+          components={{ 
+            Callout, 
+            img: MdxImage, 
+            Steps, 
+            PropertyReference, 
+            Property, 
+            Tabs, 
             Tab,
+            Keybind,
+            FileTree,
+            Folder,
+            File,
+            Highlight,
             EasingVisualizer: (props) => (
               <ClientOnly>
                 <EasingVisualizer {...props} />
@@ -67,7 +70,7 @@ export default function DocsPage({ source, frontMatter, pagination }: DocsPagePr
               }
               return <pre {...props}>{children}</pre>;
             },
-          }}
+          }} 
         />
       </article>
 
@@ -75,7 +78,7 @@ export default function DocsPage({ source, frontMatter, pagination }: DocsPagePr
         {pagination.prev ? <PaginationLink type="prev" {...pagination.prev} /> : <div />}
         {pagination.next ? <PaginationLink type="next" {...pagination.next} /> : <div />}
       </div>
-    </Layout>
+    </>
   );
 }
 
@@ -115,7 +118,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     const { content, data } = matter(fileContents);
     
     const mdxSource = await serialize(content, {
-      parseFrontmatter: false,
       mdxOptions: {
         rehypePlugins: [
           rehypeSlug,
@@ -137,7 +139,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     return {
       props: {
         source: mdxSource,
-        frontMatter: data,
+
+...data,
         pagination: {
           prev: prev ? { title: prev.title, href: prev.href } : null,
           next: next ? { title: next.title, href: next.href } : null,

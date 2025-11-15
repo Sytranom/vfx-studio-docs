@@ -206,3 +206,88 @@
 .property-item .prose-styles p {
   margin-bottom: 0.1rem;
 }
+
+.file-tree ul {
+  position: relative;
+  list-style: none;
+  padding-left: 1rem;
+}
+
+.file-tree .file-tree-item {
+  position: relative;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.file-tree .file-tree-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -0.75rem;
+  height: 100%;
+  width: 1px;
+  background-color: var(--color-border-color);
+}
+
+.file-tree .file-tree-item::after {
+  content: '';
+  position: absolute;
+  top: 1.125rem; 
+  left: -0.75rem;
+  height: 1px;
+  width: 0.75rem;
+  background-color: var(--color-border-color);
+}
+
+.file-tree li:last-child::before {
+  height: 1.125rem;
+}
+
+.callout {
+  
+  color: light-dark(var(--color-text-secondary-light), var(--color-text-secondary-dark));
+}
+.callout h4 {
+  
+  color: light-dark(var(--color-text-primary-light), var(--color-text-primary-dark));
+}
+
+.callout--info {
+  background-color: light-dark(theme(colors.blue.100), theme(colors.blue.900 / 0.2));
+  border-color: light-dark(theme(colors.blue.500), theme(colors.blue.500 / 0.8));
+}
+.callout--info .lucide-info { 
+  color: light-dark(theme(colors.blue.600), theme(colors.blue.400));
+}
+
+.callout--warning {
+  background-color: light-dark(theme(colors.amber.100), theme(colors.amber.900 / 0.2));
+  border-color: light-dark(theme(colors.amber.500), theme(colors.amber.500 / 0.8));
+}
+.callout--warning .lucide-alert-triangle {
+  color: light-dark(theme(colors.amber.600), theme(colors.amber.400));
+}
+
+.callout--danger {
+  background-color: light-dark(theme(colors.red.100), theme(colors.red.900 / 0.2));
+  border-color: light-dark(theme(colors.red.500), theme(colors.red.500 / 0.8));
+}
+.callout--danger .lucide-x-circle {
+  color: light-dark(theme(colors.red.600), theme(colors.red.400));
+}
+
+.callout--success {
+  background-color: light-dark(theme(colors.emerald.100), theme(colors.emerald.900 / 0.2));
+  border-color: light-dark(theme(colors.emerald.500), theme(colors.emerald.500 / 0.8));
+}
+.callout--success .lucide-check-circle {
+  color: light-dark(theme(colors.emerald.600), theme(colors.emerald.400));
+}
+
+.callout--tip {
+  background-color: light-dark(theme(colors.violet.100), theme(colors.violet.900 / 0.2));
+  border-color: light-dark(theme(colors.violet.500), theme(colors.violet.500 / 0.8));
+}
+.callout--tip .lucide-lightbulb {
+  color: light-dark(theme(colors.violet.600), theme(colors.violet.400));
+}

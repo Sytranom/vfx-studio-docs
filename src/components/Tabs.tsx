@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Children } from 'react';
+import React, { useState, Children, useRef, useEffect } from 'react';
 
 interface TabProps {
   title: string;
@@ -12,19 +12,44 @@ export const Tab: React.FC<TabProps> = ({ children }) => {
 };
 
 interface TabsProps {
-  
   children: React.ReactElement<TabProps> | React.ReactElement<TabProps>[];
 }
 
 export const Tabs: React.FC<TabsProps> = ({ children }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  
+  const [contentHeight, setContentHeight] = useState<number | 'auto'>('auto');
+  
+  const contentRef = useRef<HTMLDivElement>(null);
 
-const tabsArray = Children.toArray(children) as React.ReactElement<TabProps>[];
+  const tabsArray = Children.toArray(children) as React.ReactElement<TabProps>[];
+
+useEffect(() => {
+    const contentElement = contentRef.current;
+
+if (contentElement) {
+
+const resizeObserver = new ResizeObserver(entries => {
+        for (let entry of entries) {
+          const newHeight = entry.contentRect.height;
+
+if (newHeight > 0) {
+            setContentHeight(newHeight);
+          }
+        }
+      });
+
+resizeObserver.observe(contentElement);
+
+return () => {
+        resizeObserver.disconnect();
+      };
+    }
+  }, []); 
 
   return (
     <div className="tabs-container my-6">
       <div className="flex border-b border-border-color">
-        {}
         {tabsArray.map((tab, index) => (
           <button
             key={index}
@@ -40,8 +65,15 @@ const tabsArray = Children.toArray(children) as React.ReactElement<TabProps>[];
           </button>
         ))}
       </div>
+
       {}
-      <div className="py-4">{tabsArray[activeIndex]}</div>
+      <div 
+        ref={contentRef} 
+        style={{ minHeight: contentHeight }} 
+        className="py-4 relative"
+      >
+        {tabsArray[activeIndex]}
+      </div>
     </div>
   );
 };

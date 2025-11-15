@@ -12,27 +12,61 @@ Boost your productivity and streamline your workflow by mastering the keyboard s
 
 These shortcuts are available globally while the VFX Studio window is focused.
 
-- **Ctrl + S**: Save the currently selected effect.
-- **Ctrl + Z**: Undo the last action.
-- **Ctrl + Y**: Redo the last undone action.
-- **Ctrl + Shift + R**: Resimulate the currently selected effect in the viewport, restarting its animation.
-- **Delete**: Delete the selected emitter or module.
+<PropertyReference>
+  <Property name={<Keybind keys={['Ctrl', 'S']} />} type="Action">
+    Saves the currently selected effect.
+  </Property>
+  <Property name={<Keybind keys={['Ctrl', 'Z']} />} type="Action">
+    Undoes the last action.
+  </Property>
+  <Property name={<Keybind keys={['Ctrl', 'Y']} />} type="Action">
+    Redoes the last undone action.
+  </Property>
+  <Property name={<Keybind keys={['Ctrl', 'Shift', 'R']} />} type="Action">
+    Resimulates the currently selected effect in the viewport, restarting its animation.
+  </Property>
+  <Property name={<Keybind keys={['Delete']} />} type="Action">
+    Deletes the selected emitter or module.
+  </Property>
+</PropertyReference>
 
 Quickly navigate and toggle the different panels within the UI.
 
-- **F1**: Toggle the Emitter Properties panel.
-- **F2**: Toggle the Sliders panel.
-- **F3**: Toggle the Curve Editor panel.
-- **F4**: Toggle the Advanced Panel.
-- **Tab**: Cycle focus between the currently open panels.
+<PropertyReference>
+  <Property name={<Keybind keys={['F1']} />} type="Toggle">
+    Toggles the Emitter Properties panel.
+  </Property>
+  <Property name={<Keybind keys={['F2']} />} type="Toggle">
+    Toggles the Sliders panel.
+  </Property>
+  <Property name={<Keybind keys={['F3']} />} type="Toggle">
+    Toggles the Curve Editor panel.
+  </Property>
+  <Property name={<Keybind keys={['F4']} />} type="Toggle">
+    Toggles the Advanced Panel.
+  </Property>
+  <Property name={<Keybind keys={['Tab']} />} type="Action">
+    Cycles focus between the currently open panels.
+  </Property>
+</PropertyReference>
 
 Shortcuts for interacting with effects directly in the 3D viewport.
 
-- **F**: Frame the selected effect, centering it in the camera's view.
-- **Alt + Left Click + Drag**: Orbit the camera around the effect's origin.
-- **Alt + Right Click + Drag**: Dolly (zoom) the camera in and out.
-- **Ctrl + Alt + Click**: Select the emitter source of a particle you click on.
+<PropertyReference>
+  <Property name={<Keybind keys={['F']} />} type="Action">
+    Frames the selected effect, centering it in the camera's view.
+  </Property>
+  <Property name={<Keybind keys={['Alt', 'LMB Drag']} />} type="Action">
+    Orbits the camera around the effect's origin.
+  </Property>
+  <Property name={<Keybind keys={['Alt', 'RMB Drag']} />} type="Action">
+    Dollies (zooms) the camera in and out.
+  </Property>
+  <Property name={<Keybind keys={['Ctrl', 'Alt', 'Click']} />} type="Action">
+    Selects the emitter source of a particle you click on.
+  </Property>
+</PropertyReference>
 
 <Callout type="tip" title="Customizable Keybinds">
-  All keybinds can be customized in the Settings panel. You can even create and export your own keymap presets to share with your team.
+  All keybinds can be customized in the Settings panel. You can even <Highlight>create and export</Highlight> your own keymap presets to share with your team.
 </Callout>

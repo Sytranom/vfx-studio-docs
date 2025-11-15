@@ -3,6 +3,7 @@ import {
   faRocket,
   faBook,
   faBookOpen,
+  faBolt, 
 } from "@fortawesome/free-solid-svg-icons";
 import { faDiscord, faGithub } from "@fortawesome/free-brands-svg-icons";
 
@@ -42,6 +43,30 @@ export const navigation: NavSection[] = [
             },
         ],
   },
+  
+  {
+    title: 'ADVANCED TOPICS',
+    links: [
+      {
+        title: 'Techniques',
+        href: '#',
+        icon: faBolt,
+        children: [
+          { title: 'Advanced Scripting', href: '/docs/advanced-scripting' },
+          { title: 'Performance Tuning', href: '/docs/performance-tuning' },
+        ]
+      },
+      {
+        title: 'Networking',
+        href: '#',
+        icon: faBookOpen, 
+        children: [
+          { title: 'Networking Basics', href: '/docs/networking-basics' },
+          { title: 'Replication Strategies', href: '/docs/replication-strategies' },
+        ]
+      }
+    ]
+  }
 ];
 
 export const headerLinks = [

@@ -1,10 +1,20 @@
-import Layout from "@/components/Layout";
 import Link from "next/link";
 import FeatureSection from "@/components/FeatureSection";
 
+export async function getStaticProps() {
+  return {
+    props: {
+      title: "Home",
+      breadcrumbs: "Home",
+      description: "VFX Studio is an all-in-one toolkit for Roblox developers to design, manage, and deploy stunning visual effects.",
+    },
+  };
+}
+
 export default function HomePage() {
+  
   return (
-    <Layout breadcrumbs="Home" title="Home">
+    <>
       <div className="text-center pb-12">
         <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-text-primary to-text-secondary bg-clip-text text-transparent">
           Create Breathtaking Visual Effects
@@ -62,6 +72,6 @@ export default function HomePage() {
           organize it all with a powerful filtering and search system.
         </FeatureSection>
       </div>
-    </Layout>
+    </>
   );
 }

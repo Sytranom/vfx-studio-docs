@@ -11,6 +11,8 @@ import Footer from "./Footer";
 import { useSidebarStore, SIDEBAR_STORAGE_KEY } from "@/hooks/use-sidebar";
 import { useContentWidthStore } from "@/hooks/use-content-width";
 
+import { useScrollToTop } from "@/hooks/use-scroll-to-top";
+
 interface LayoutProps {
   children: React.ReactNode;
   breadcrumbs: string;
@@ -29,6 +31,8 @@ const Layout: React.FC<LayoutProps> = ({
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
 
+const mainScrollRef = useScrollToTop();
+
   useEffect(() => {
     try {
       const storedValue = localStorage.getItem(SIDEBAR_STORAGE_KEY);
@@ -43,61 +47,7 @@ const Layout: React.FC<LayoutProps> = ({
     
   }, []);
 
-  useEffect(() => {
-    const handleRouteChange = () => {
-      close();
-    };
-    router.events.on('routeChangeComplete', handleRouteChange);
-    return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
-    };
-  }, [router, close]);
-
-  // --- THIS IS THE FIX ---
-  // This useEffect runs on the client-side after the page content has rendered.
-  // It depends on `router.asPath`, so it will re-run every time you navigate to a new page.
-  useEffect(() => {
-    // Find all h2 and h3 elements within the main article container.
-    const headers = document.querySelectorAll<HTMLElement>('.doc-article h2, .doc-article h3');
-    
-    headers.forEach(header => {
-      // For each header, check if it has an ID (it should, thanks to rehype-slug).
-      if (header.id) {
-        // Create a new anchor link element.
-        const anchor = document.createElement('a');
-        anchor.className = 'anchor'; // This is the class our CSS targets.
-        anchor.href = `#${header.id}`;
-        anchor.setAttribute('aria-hidden', 'true');
-        
-        // This is the clever part: move all of the header's existing content
-        // INSIDE our new anchor link.
-        while (header.firstChild) {
-          anchor.appendChild(header.firstChild);
-        }
-        
-        // Finally, put the anchor link (which now contains the original text)
-        // back inside the now-empty header.
-        header.appendChild(anchor);
-      }
-    });
-
-    // The function returns a "cleanup" function. This runs before the effect runs again.
-    // It finds all the links we just created and reverts them, preventing duplicate links on fast re-renders.
-    return () => {
-      document.querySelectorAll<HTMLAnchorElement>('.doc-article h2 a.anchor, .doc-article h3 a.anchor').forEach(anchor => {
-        const header = anchor.parentElement;
-        if (header) {
-          while (anchor.firstChild) {
-            header.insertBefore(anchor.firstChild, anchor);
-          }
-          header.removeChild(anchor);
-        }
-      });
-    };
-  }, [router.asPath]); // Re-run this logic on every page navigation.
-  // --- END OF FIX ---
-
-  const contentWidthClass = {
+const contentWidthClass = {
     normal: 'max-w-3xl',
     wide: 'max-w-5xl',
     fluid: 'max-w-full px-4',
@@ -118,7 +68,9 @@ const Layout: React.FC<LayoutProps> = ({
       
       <Header breadcrumbs={breadcrumbs} />
 
+      {}
       <main 
+        ref={mainScrollRef}
         className="bg-bg-main lg:col-start-2 lg:row-start-2 lg:border-t lg:border-l lg:border-border-color lg:rounded-tl-lg overflow-auto min-w-0"
       >
         <motion.div

@@ -1,4 +1,3 @@
-import Layout from "@/components/Layout";
 import Card from "@/components/Card";
 import {
   faCameraRotate,
@@ -7,9 +6,19 @@ import {
   faPalette,
 } from "@fortawesome/free-solid-svg-icons";
 
+export async function getStaticProps() {
+  return {
+    props: {
+      title: "How-To Guides",
+      breadcrumbs: "Getting Started / How-To Guides",
+    },
+  };
+}
+
 export default function GuidesPage() {
+  
   return (
-    <Layout breadcrumbs="Getting Started / How-To Guides" title="How-To Guides">
+    <>
       <div className="text-center pb-12">
         <h1 className="text-5xl font-bold mb-2">How-To Guides</h1>
         <p className="text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed">
@@ -39,6 +48,6 @@ export default function GuidesPage() {
           different color themes in the Settings panel.
         </Card>
       </div>
-    </Layout>
+    </>
   );
 }

@@ -92,6 +92,10 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
   const { openSections, toggleSection, setSectionOpen } = useNavigationStore();
   const [isMounted, setIsMounted] = useState(false);
   const hasBeenOpened = useRef(false);
+  const childrenUListRef = useRef<HTMLUListElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  
+  const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0, opacity: 0 });
 
   useEffect(() => {
     setIsMounted(true);
@@ -113,6 +117,33 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
       setSectionOpen(item.title, true);
     }
   }, [isParentOfActive, item.title, setSectionOpen]);
+  
+  useEffect(() => {
+    if (isOpen && childrenUListRef.current) {
+      const links = Array.from(childrenUListRef.current.querySelectorAll('a'));
+
+if (trackRef.current && links.length > 1) {
+        const firstLink = links[0];
+        const lastLink = links[links.length - 1];
+
+const top = firstLink.offsetTop + firstLink.offsetHeight / 4.75;
+        
+        const bottom = lastLink.offsetTop + lastLink.offsetHeight / 1.25;
+
+const height = bottom - top;
+
+        trackRef.current.style.top = `${top}px`;
+        trackRef.current.style.height = `${height}px`;
+      }
+      
+      const activeLink = links.find(a => a.pathname === currentPath);
+      if (activeLink) {
+        const targetHeight = activeLink.offsetHeight * 0.6;
+        const targetTop = activeLink.offsetTop + (activeLink.offsetHeight - targetHeight) / 2;
+        setIndicatorStyle({ top: targetTop, height: targetHeight, opacity: 1 });
+      }
+    }
+  }, [currentPath, isOpen, item.children]);
 
   const handleToggle = (e: React.MouseEvent) => {
     if (hasChildren) {
@@ -150,8 +181,8 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
       </Link>
       <AnimatePresence initial={false}>
         {isOpen && hasChildren && (
-          <motion.ul
-            className="list-none overflow-hidden"
+          <motion.div
+            className="overflow-hidden pl-7"
             key="content"
             initial={hasBeenOpened.current ? "open" : "closed"}
             animate="open"
@@ -159,19 +190,42 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
             variants={variants}
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
-            {item.children?.map((child) => (
-              <li key={child.href}>
-                <Link
-                  href={child.href}
-                  className={`block text-sm py-2 pl-10 rounded-md transition-colors duration-200 ease-in-out fade-truncate ${
-                    isChildActive(child.href) ? "text-primary-accent font-semibold" : "text-text-secondary hover:text-text-primary"
-                  }`}
-                >
-                  {child.title}
-                </Link>
-              </li>
-            ))}
-          </motion.ul>
+            <ul ref={childrenUListRef} className="list-none relative py-1">
+              <div 
+                ref={trackRef} 
+                className="absolute w-[2px] bg-border-color/50"
+                style={{ left: '-1px' }}
+              />
+              
+              <AnimatePresence>
+                {isParentOfActive && (
+                  <motion.div
+                    layoutId="active-sidebar-indicator"
+                    className="absolute w-[3px] bg-primary-accent rounded-full"
+                    initial={false}
+                    animate={indicatorStyle}
+                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    style={{ left: '-1.5px' }}
+                  />
+                )}
+              </AnimatePresence>
+
+              {item.children?.map((child) => (
+                <li key={child.href}>
+                  <Link
+                    href={child.href}
+                    className={`block text-sm py-2 pl-4 rounded-md transition-colors duration-200 ease-in-out fade-truncate ${
+                      isChildActive(child.href) 
+                        ? "text-primary-accent font-semibold" 
+                        : "text-text-secondary hover:text-text-primary hover:bg-bg-inset"
+                    }`}
+                  >
+                    {child.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
         )}
       </AnimatePresence>
     </li>

@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Highlight, themes } from 'prism-react-renderer';
 import { Copy, Check } from 'lucide-react';
 import { setupPrism } from '@/lib/prism';
+import { useTheme } from 'next-themes'; 
 
-// Run the setup function once when the component module is loaded.
 setupPrism();
 
 const CodeBlock = ({ children, className: outerClassName }: { children: string; className?: string }) => {
@@ -13,6 +13,11 @@ const CodeBlock = ({ children, className: outerClassName }: { children: string; 
   const fileNameMatch = outerClassName?.match(/filename="([^"]+)"/);
   const fileName = fileNameMatch ? fileNameMatch[1] : null;
   const [isCopied, setIsCopied] = useState(false);
+
+const { theme } = useTheme();
+
+const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const handleCopy = () => {
     const codeToCopy = children.trim();
@@ -22,9 +27,15 @@ const CodeBlock = ({ children, className: outerClassName }: { children: string; 
     });
   };
 
+if (!mounted) {
+    return (
+      <div className="relative my-6 rounded-lg border border-border-color bg-bg-surface group overflow-hidden">
+        <div className="p-4" style={{ minHeight: '80px' }}></div>
+      </div>
+    );
+  }
+
   return (
-    // THIS IS THE FIX: Added `overflow-hidden` to the main container.
-    // This class will clip the sharp corners of the inner <pre> tag's background.
     <div className="relative my-6 rounded-lg border border-border-color group overflow-hidden">
       {fileName && (
         <div className="text-sm px-4 py-2 font-mono text-text-secondary border-b border-border-color bg-bg-inset">
@@ -41,7 +52,8 @@ const CodeBlock = ({ children, className: outerClassName }: { children: string; 
       </button>
 
       <Highlight
-        theme={themes.vsDark}
+        
+        theme={theme === 'dark' ? themes.vsDark : themes.github}
         code={children.trim()}
         language={language}
       >
@@ -51,8 +63,8 @@ const CodeBlock = ({ children, className: outerClassName }: { children: string; 
             style={{
               ...style,
               fontFamily: 'var(--font-mono)',
-              // The background is now applied directly here. Its corners will be clipped by the parent.
-              backgroundColor: style.backgroundColor, 
+              
+              backgroundColor: style.backgroundColor,
             }}
           >
             {tokens.map((line, i) => (

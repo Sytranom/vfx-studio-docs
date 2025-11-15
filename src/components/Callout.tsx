@@ -19,33 +19,13 @@ interface CalloutProps {
 
 const typeConfig: Record<
   CalloutType,
-  { icon: LucideIcon; defaultTitle: string; classes: string }
+  { icon: LucideIcon; defaultTitle: string; className: string }
 > = {
-  info: {
-    icon: Info,
-    defaultTitle: 'Info',
-    classes: 'bg-blue-900/20 border-blue-500/80 text-blue-300',
-  },
-  warning: {
-    icon: AlertTriangle,
-    defaultTitle: 'Warning',
-    classes: 'bg-amber-900/20 border-amber-500/80 text-amber-300',
-  },
-  danger: {
-    icon: XCircle,
-    defaultTitle: 'Danger',
-    classes: 'bg-red-900/20 border-red-500/80 text-red-300',
-  },
-  success: {
-    icon: CheckCircle,
-    defaultTitle: 'Success',
-    classes: 'bg-emerald-900/20 border-emerald-500/80 text-emerald-300',
-  },
-  tip: {
-    icon: Lightbulb,
-    defaultTitle: 'Pro Tip',
-    classes: 'bg-violet-900/20 border-violet-500/80 text-violet-300',
-  },
+  info:    { icon: Info,          defaultTitle: 'Info',    className: 'callout--info' },
+  warning: { icon: AlertTriangle, defaultTitle: 'Warning', className: 'callout--warning' },
+  danger:  { icon: XCircle,       defaultTitle: 'Danger',  className: 'callout--danger' },
+  success: { icon: CheckCircle,   defaultTitle: 'Success', className: 'callout--success' },
+  tip:     { icon: Lightbulb,     defaultTitle: 'Pro Tip', className: 'callout--tip' },
 };
 
 const Callout: React.FC<CalloutProps> = ({
@@ -53,20 +33,21 @@ const Callout: React.FC<CalloutProps> = ({
   title,
   children,
 }) => {
-  const { icon: Icon, defaultTitle, classes } = typeConfig[type];
+  const { icon: Icon, defaultTitle, className } = typeConfig[type];
   const finalTitle = title || defaultTitle;
 
   return (
-    <div
-      className={`callout my-6 rounded-lg border-l-4 p-5 text-sm ${classes}`}
-    >
+    
+    <div className={`callout my-6 rounded-lg border-l-4 p-5 text-sm ${className}`}>
       <div className="flex items-center gap-3 mb-2">
         <Icon className="h-5 w-5 flex-shrink-0" />
-        <h4 className="flex-grow text-base font-semibold text-white">
+        <h4 className="flex-grow text-base font-semibold">
           {finalTitle}
         </h4>
       </div>
-      <div className="prose-styles pl-8">{children}</div>
+      <div className="prose-styles pl-8">
+        {children}
+      </div>
     </div>
   );
 };

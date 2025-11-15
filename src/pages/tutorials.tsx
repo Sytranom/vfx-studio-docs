@@ -1,4 +1,3 @@
-import Layout from "@/components/Layout";
 import Card from "@/components/Card";
 import {
   faHatWizard,
@@ -6,9 +5,19 @@ import {
   faRoute,
 } from "@fortawesome/free-solid-svg-icons";
 
+export async function getStaticProps() {
+  return {
+    props: {
+      title: "Tutorials",
+      breadcrumbs: "Getting Started / Tutorials",
+    },
+  };
+}
+
 export default function TutorialsPage() {
+  
   return (
-    <Layout breadcrumbs="Getting Started / Tutorials" title="Tutorials">
+    <>
       <div className="text-center pb-12">
         <h1 className="text-5xl font-bold mb-2">Tutorials</h1>
         <p className="text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed">
@@ -37,6 +46,6 @@ export default function TutorialsPage() {
           effects.
         </Card>
       </div>
-    </Layout>
+    </>
   );
 }
