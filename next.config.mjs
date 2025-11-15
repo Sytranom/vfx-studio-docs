@@ -9,7 +9,7 @@ const nextConfig = {
     unoptimized: true,
   },
   // comment out the basePath line when working locally
-  basePath: '/vfx-studio-docs', 
+  // basePath: '/vfx-studio-docs', 
 };
 
 export default withMDX(nextConfig);

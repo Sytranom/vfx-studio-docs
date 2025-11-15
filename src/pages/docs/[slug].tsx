@@ -5,11 +5,10 @@ import { MDXRemote } from "next-mdx-remote";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import matter from "gray-matter";
+import React from 'react';
 
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import rehypePrettyCode from "rehype-pretty-code";
-import type { Options } from 'rehype-pretty-code';
 
 import Layout from "@/components/Layout";
 import Callout from "@/components/Callout";
@@ -20,6 +19,8 @@ import PropertyReference from "@/components/PropertyReference";
 import Property from "@/components/Property";
 import { Tabs, Tab } from "@/components/Tabs";
 import EasingVisualizer from "@/components/EasingVisualizer";
+import CodeBlock from "@/components/CodeBlock";
+import ClientOnly from "@/components/ClientOnly";
 
 import { navigation } from '@/config/siteConfig';
 
@@ -40,18 +41,33 @@ export default function DocsPage({ source, frontMatter, pagination }: DocsPagePr
       description={frontMatter.description}
     >
       <article className="doc-article">
-        <MDXRemote 
-          {...source} 
-          components={{ 
-            Callout, 
-            img: MdxImage, 
-            Steps, 
-            PropertyReference, 
-            Property, 
-            Tabs, 
+        <MDXRemote
+          {...source}
+          components={{
+            Callout,
+            img: MdxImage,
+            Steps,
+            PropertyReference,
+            Property,
+            Tabs,
             Tab,
-            EasingVisualizer 
-          }} 
+            EasingVisualizer: (props) => (
+              <ClientOnly>
+                <EasingVisualizer {...props} />
+              </ClientOnly>
+            ),
+            pre: ({ children, ...props }) => {
+              if (React.isValidElement(children) && children.type === 'code') {
+                const codeProps = children.props;
+                return (
+                  <ClientOnly>
+                    <CodeBlock className={codeProps.className} children={codeProps.children} />
+                  </ClientOnly>
+                );
+              }
+              return <pre {...props}>{children}</pre>;
+            },
+          }}
         />
       </article>
 
@@ -74,34 +90,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
   }));
 
   return { paths, fallback: false };
-};
-
-const prettyCodeOptions: Partial<Options> = {
-  theme: {
-    dark: 'github-dark',
-    light: 'github-light',
-  },
-  keepBackground: false,
-  onVisitLine(node) {
-    if (node.children.length === 0) {
-      node.children = [{ type: 'text', value: ' ' }];
-    }
-  },
-  onVisitHighlightedLine(node) {
-    if (!node.properties) {
-      node.properties = {};
-    }
-    if (!Array.isArray(node.properties.className)) {
-      node.properties.className = [];
-    }
-    node.properties.className.push('highlighted');
-  },
-  onVisitHighlightedChars(node) {
-    if (!node.properties) {
-        node.properties = {};
-    }
-    node.properties.className = ['highlighted', 'word'];
-  },
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
@@ -131,8 +119,17 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       mdxOptions: {
         rehypePlugins: [
           rehypeSlug,
-          [rehypeAutolinkHeadings, { behavior: "wrap", properties: { className: ['anchor'] } }],
-          [rehypePrettyCode, prettyCodeOptions],
+          [
+            rehypeAutolinkHeadings,
+            {
+              properties: {
+                className: ['anchor'],
+                'aria-hidden': 'true',
+                tabIndex: -1,
+              },
+              behavior: 'wrap',
+            },
+          ],
         ],
       },
     });

@@ -53,6 +53,50 @@ const Layout: React.FC<LayoutProps> = ({
     };
   }, [router, close]);
 
+  // --- THIS IS THE FIX ---
+  // This useEffect runs on the client-side after the page content has rendered.
+  // It depends on `router.asPath`, so it will re-run every time you navigate to a new page.
+  useEffect(() => {
+    // Find all h2 and h3 elements within the main article container.
+    const headers = document.querySelectorAll<HTMLElement>('.doc-article h2, .doc-article h3');
+    
+    headers.forEach(header => {
+      // For each header, check if it has an ID (it should, thanks to rehype-slug).
+      if (header.id) {
+        // Create a new anchor link element.
+        const anchor = document.createElement('a');
+        anchor.className = 'anchor'; // This is the class our CSS targets.
+        anchor.href = `#${header.id}`;
+        anchor.setAttribute('aria-hidden', 'true');
+        
+        // This is the clever part: move all of the header's existing content
+        // INSIDE our new anchor link.
+        while (header.firstChild) {
+          anchor.appendChild(header.firstChild);
+        }
+        
+        // Finally, put the anchor link (which now contains the original text)
+        // back inside the now-empty header.
+        header.appendChild(anchor);
+      }
+    });
+
+    // The function returns a "cleanup" function. This runs before the effect runs again.
+    // It finds all the links we just created and reverts them, preventing duplicate links on fast re-renders.
+    return () => {
+      document.querySelectorAll<HTMLAnchorElement>('.doc-article h2 a.anchor, .doc-article h3 a.anchor').forEach(anchor => {
+        const header = anchor.parentElement;
+        if (header) {
+          while (anchor.firstChild) {
+            header.insertBefore(anchor.firstChild, anchor);
+          }
+          header.removeChild(anchor);
+        }
+      });
+    };
+  }, [router.asPath]); // Re-run this logic on every page navigation.
+  // --- END OF FIX ---
+
   const contentWidthClass = {
     normal: 'max-w-3xl',
     wide: 'max-w-5xl',
@@ -60,8 +104,7 @@ const Layout: React.FC<LayoutProps> = ({
   }[contentWidth];
 
   return (
-
-<div
+    <div
       className={`
         relative h-screen bg-bg-surface lg:grid lg:grid-rows-[60px_1fr]
         transition-opacity duration-300 ease-in-out
