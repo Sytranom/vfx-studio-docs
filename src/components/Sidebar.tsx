@@ -10,6 +10,7 @@ import { useNavigationStore } from "@/hooks/use-navigation-store";
 import SidebarResizer from "./SidebarResizer";
 import ThemeSwitcher from "./ThemeSwitcher";
 import WidthToggler from "./WidthToggler";
+import ClientOnly from "./ClientOnly";
 
 const Sidebar: React.FC = () => {
   const { isOpen, close, width } = useSidebarStore();
@@ -119,18 +120,18 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
   }, [isParentOfActive, item.title, setSectionOpen]);
   
   useEffect(() => {
+    
     if (isOpen && childrenUListRef.current) {
       const links = Array.from(childrenUListRef.current.querySelectorAll('a'));
-
-if (trackRef.current && links.length > 1) {
+      
+      if (trackRef.current && links.length > 1) {
         const firstLink = links[0];
         const lastLink = links[links.length - 1];
-
-const top = firstLink.offsetTop + firstLink.offsetHeight / 4.75;
         
+        const top = firstLink.offsetTop + firstLink.offsetHeight / 4.75;
         const bottom = lastLink.offsetTop + lastLink.offsetHeight / 1.25;
-
-const height = bottom - top;
+        
+        const height = bottom - top;
 
         trackRef.current.style.top = `${top}px`;
         trackRef.current.style.height = `${height}px`;
@@ -191,24 +192,30 @@ const height = bottom - top;
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
             <ul ref={childrenUListRef} className="list-none relative py-1">
-              <div 
-                ref={trackRef} 
-                className="absolute w-[2px] bg-border-color/50"
-                style={{ left: '-1px' }}
-              />
-              
-              <AnimatePresence>
-                {isParentOfActive && (
-                  <motion.div
-                    layoutId="active-sidebar-indicator"
-                    className="absolute w-[3px] bg-primary-accent rounded-full"
-                    initial={false}
-                    animate={indicatorStyle}
-                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                    style={{ left: '-1.5px' }}
-                  />
-                )}
-              </AnimatePresence>
+              {}
+              {}
+              <ClientOnly>
+                {}
+                <div 
+                  ref={trackRef} 
+                  className="absolute w-[2px] bg-border-color/50"
+                  style={{ left: '-1px' }}
+                />
+                
+                {}
+                <AnimatePresence>
+                  {isParentOfActive && (
+                    <motion.div
+                      layoutId="active-sidebar-indicator"
+                      className="absolute w-[3px] bg-primary-accent rounded-full"
+                      initial={false}
+                      animate={indicatorStyle}
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                      style={{ left: '-1.5px' }}
+                    />
+                  )}
+                </AnimatePresence>
+              </ClientOnly>
 
               {item.children?.map((child) => (
                 <li key={child.href}>
