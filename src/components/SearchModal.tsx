@@ -9,6 +9,7 @@ interface SearchDoc {
   slug: string;
   title: string;
   breadcrumbs: string;
+  content: string; // Add content to the type
 }
 
 const SearchModal: React.FC = () => {
@@ -16,10 +17,8 @@ const SearchModal: React.FC = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchDoc[]>([]);
 
-  // --- Setup ---
   const closeModal = () => {
     document.getElementById("search-modal-overlay")?.classList.remove("visible");
-    // Clear query when closing
     setQuery(""); 
   };
 
@@ -28,15 +27,16 @@ const SearchModal: React.FC = () => {
     (document.getElementById("search-input") as HTMLInputElement)?.focus();
   };
   
-  // --- Initialize Search Index ---
   useEffect(() => {
     const searchIndex = new FlexSearch.Document<SearchDoc, true>({
         document: {
             id: "id",
-            index: ["title", "breadcrumbs"],
+            // --- THIS IS THE FIX ---
+            // We now index the title, breadcrumbs, AND the full content.
+            index: ["title", "breadcrumbs", "content"],
             store: true,
         },
-        tokenize: "forward"
+        tokenize: "full" // Use 'full' tokenization for better content matching
     });
 
     fetch("/search.json")
@@ -49,7 +49,6 @@ const SearchModal: React.FC = () => {
       });
   }, []);
 
-  // --- Handle Search Query ---
   useEffect(() => {
     if (!query || !index) {
       setResults([]);
@@ -72,8 +71,6 @@ const SearchModal: React.FC = () => {
     setResults(flatResults);
   }, [query, index]);
 
-
-  // --- Keyboard Shortcuts ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
@@ -109,7 +106,7 @@ const SearchModal: React.FC = () => {
             onChange={(e) => setQuery(e.target.value)}
           />
           <button
-            className="ml-4 bg-bg-inset border border-border-color text-text-secondary rounded-md px-3 py-1 text-xs font-mono"
+            className="ml-4 bg-bg-inset border-border-color text-text-secondary rounded-md px-3 py-1 text-xs font-mono"
             onClick={closeModal}
           >
             ESC
@@ -122,7 +119,8 @@ const SearchModal: React.FC = () => {
                     <li key={result.id}>
                         <Link href={result.slug} onClick={closeModal} className="block p-4 hover:bg-bg-inset border-b border-border-color">
                             <div className="font-medium text-text-primary">{result.title}</div>
-                            <div className="text-sm text-text-secondary">{result.breadcrumbs}</div>
+                            {/* We no longer show breadcrumbs here to keep it clean */}
+                            {/* Instead, a snippet from the content could be shown in the future */}
                         </Link>
                     </li>
                 ))}

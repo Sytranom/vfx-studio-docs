@@ -1,0 +1,2354 @@
+# ------------------------------
+# File: .gitignore
+# ------------------------------
+
+.next
+
+out
+node_modules
+_pagefind
+
+*.lock
+pnpm-lock.yaml
+
+
+# ------------------------------
+# File: next-env.d.ts
+# ------------------------------
+
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+/// <reference path="./.next/types/routes.d.ts" />
+
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
+
+
+# ------------------------------
+# File: next.config.ts
+# ------------------------------
+
+import nextra from "nextra";
+import config from "./src/config";
+
+const withNextra = nextra({});
+
+export default withNextra({
+  output: "export",
+  trailingSlash: true,
+  basePath: config.path,
+  assetPrefix: config.path,
+  images: {
+    unoptimized: true,
+  },
+  turbopack: {
+    resolveAlias: {
+      "next-mdx-import-source-file": "./src/mdx-components.tsx",
+    },
+  },
+});
+
+
+# ------------------------------
+# File: package.json
+# ------------------------------
+
+{
+  "type": "module",
+  "scripts": {
+    "dev": "next --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "postbuild": "pagefind --site .next/server/app --output-path out/_pagefind"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.12",
+    "next": "^15.5.2",
+    "next-themes": "^0.4.6",
+    "nextra": "^4.4.0",
+    "nextra-theme-docs": "^4.4.0",
+    "postcss": "^8.5.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "tailwindcss": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.1.12",
+    "pagefind": "^1.3.0",
+    "typescript": "^5.9.2"
+  }
+}
+
+
+# ------------------------------
+# File: postcss.config.mjs
+# ------------------------------
+
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+
+export default config;
+
+
+# ------------------------------
+# File: tsconfig.json
+# ------------------------------
+
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}
+
+
+# ------------------------------
+# File: src/config.ts
+# ------------------------------
+
+export default {
+  path: "/vfx-forge",
+};
+
+
+# ------------------------------
+# File: src/mdx-components.tsx
+# ------------------------------
+
+import { useMDXComponents as getThemeComponents } from "nextra-theme-docs";
+
+const themeComponents = getThemeComponents();
+
+export function useMDXComponents(components) {
+  return {
+    ...themeComponents,
+    ...components,
+  };
+}
+
+
+# ------------------------------
+# File: src/server_utils.tsx
+# ------------------------------
+
+import { MDXRemote } from "nextra/mdx-remote";
+import { compileMdx } from "nextra/compile";
+
+export async function compileText(text: string) {
+  const rawJs = await compileMdx(text, {});
+
+  return (
+    <div className="[&>p:first-child]:mt-0 [&>p:first-child]:pt-0">
+      <MDXRemote compiledSource={rawJs} />
+    </div>
+  );
+}
+
+
+# ------------------------------
+# File: src/app/globals.css
+# ------------------------------
+
+@import "tailwindcss";
+@import "nextra-theme-docs/style.css";
+
+@variant dark (&:where(.dark *));
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+# ------------------------------
+# File: src/app/layout.tsx
+# ------------------------------
+
+import Image from "next/image";
+
+import { Footer, Layout, Navbar } from "nextra-theme-docs";
+import { Banner, Head } from "nextra/components";
+
+import { getPageMap } from "nextra/page-map";
+import config from "../config";
+
+import "nextra-theme-docs/style.css";
+import "./globals.css";
+
+export const metadata = {};
+
+const navbar = (
+  <Navbar
+    logo={
+      <div className="flex gap-4 items-center">
+        <img src={`${config.path}/images/logo.svg`} width="42" height="42" />
+        <span className="font-bold text-2xl">VFX Forge</span>
+      </div>
+    }
+  />
+);
+
+const footer = <Footer>MIT {new Date().getFullYear()} © zilibobi.</Footer>;
+
+export default async function RootLayout({ children }) {
+  return (
+    <html lang="en" dir="ltr" suppressHydrationWarning>
+      <Head></Head>
+      <body>
+        <Layout
+          navbar={navbar}
+          pageMap={await getPageMap()}
+          docsRepositoryBase="https://github.com/zilibobi/forge-docs/tree/main"
+          footer={footer}
+        >
+          {children}
+        </Layout>
+      </body>
+    </html>
+  );
+}
+
+
+# ------------------------------
+# File: src/app/[[...mdxPath]]/page.tsx
+# ------------------------------
+
+import { generateStaticParamsFor, importPage } from "nextra/pages";
+import { useMDXComponents as getMDXComponents } from "../../mdx-components";
+
+export const generateStaticParams = generateStaticParamsFor("mdxPath");
+
+export async function generateMetadata(props) {
+  const params = await props.params;
+  const { metadata } = await importPage(params.mdxPath);
+  return metadata;
+}
+
+const Wrapper = getMDXComponents({}).wrapper;
+
+export default async function Page(props) {
+  const params = await props.params;
+  const result = await importPage(params.mdxPath);
+  const { default: MDXContent, toc, metadata } = result;
+  return (
+    <Wrapper toc={toc} metadata={metadata}>
+      <MDXContent {...props} params={params} />
+    </Wrapper>
+  );
+}
+
+
+# ------------------------------
+# File: src/components/Chevron.tsx
+# ------------------------------
+
+"use client";
+
+import * as React from "react";
+import { SVGProps } from "react";
+
+export default (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path d="M20.6867 13.3957C22.4378 14.7113 22.4378 17.2887 20.6867 18.6043L14.4214 23.3117C12.2071 24.9753 9 23.4347 9 20.7074L9 11.2926C9 8.5653 12.2071 7.02468 14.4214 8.68832L20.6867 13.3957Z" />
+  </svg>
+);
+
+
+# ------------------------------
+# File: src/components/ObjRef.tsx
+# ------------------------------
+
+import { compileText } from "../server_utils";
+
+const ObjRef = ({ attributes, curves }) => {
+  return (
+    <div className="mt-4">
+      <h2 className="text-2xl font-bold">Summary</h2>
+      <h3 className="text-xl pt-2 font-bold">Attributes</h3>
+      <div className="flex flex-col divide-y divide-neutral-200 dark:divide-neutral-800">
+        {attributes.map((attr, index) => (
+          <div className="py-4" key={index}>
+            <a
+              className="text-violet-600 dark:text-violet-400"
+              href={"#Attribute:" + attr.name}
+            >
+              {attr.name}
+            </a>{" "}
+            : {attr.type}
+            {compileText(attr.short)}
+          </div>
+        ))}
+      </div>
+      {curves.length > 0 && (
+        <>
+          <h3 className="text-xl font-bold">Curves</h3>
+          <div className="flex flex-col divide-y divide-neutral-200 dark:divide-neutral-800">
+            {curves.map((curve, index) => (
+              <div className="py-4" key={index}>
+                <a
+                  className="text-violet-600 dark:text-violet-400"
+                  href={"#Curve:" + curve.name}
+                >
+                  {curve.name}
+                </a>
+                {compileText(curve.short)}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {attributes.length > 0 && (
+        <>
+          <h2 className="text-2xl font-bold">Attributes</h2>
+          <div className="flex flex-col">
+            {attributes.map((attr, index) => (
+              <div className="py-4" key={index}>
+                <div className="flex gap-4 items-center justify-between">
+                  <h3
+                    className="text-xl font-bold"
+                    id={"Attribute:" + attr.name}
+                  >
+                    {attr.name}
+                  </h3>
+                  <code className="px-2 py-0.25 rounded-lg bg-neutral-200/40 dark:bg-neutral-800">
+                    {attr.type}
+                  </code>
+                </div>
+                {compileText(attr.long || attr.short)}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {curves.length > 0 && (
+        <>
+          <h2 className="text-2xl font-bold">Curves</h2>
+          <div className="flex flex-col gap-4 mt-4">
+            {curves.map((curve, index) => (
+              <div key={index}>
+                <h3 className="text-xl font-bold" id={"Curve:" + curve.name}>
+                  {curve.name}
+                </h3>
+                {compileText(curve.long || curve.short)}
+                {curve.inputs.length > 0 && (
+                  <h3 className="text-xl font-bold my-2">Inputs</h3>
+                )}
+                <div className="flex flex-col divide-y divide-neutral-200 dark:divide-neutral-800 bg-neutral-100 dark:bg-neutral-900 px-4 rounded-lg">
+                  {curve.inputs.map((input, index) => (
+                    <div className="py-4" key={index}>
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-base font-bold">{input.name}</h3>
+                        <code className="px-2 py-0.25 rounded-lg bg-neutral-200 dark:bg-neutral-800">
+                          [{input.range[0]}; {input.range[1]}]
+                        </code>
+                      </div>
+                      {compileText(input.desc)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default ObjRef;
+
+
+# ------------------------------
+# File: src/components/RobloxIcon.tsx
+# ------------------------------
+
+"use client";
+
+import config from "../config";
+import { useTheme } from "next-themes";
+
+import darkIconMap from "../data/icons_dark_map.json";
+import lightIconMap from "../data/icons_light_map.json";
+
+export default ({ type, size }) => {
+  const info = darkIconMap[type];
+
+  if (!info) {
+    throw new Error(
+      `roblox icon with class name '${type}' does not exist in the icon map json`,
+    );
+  }
+
+  const { resolvedTheme } = useTheme();
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={info.join(" ")}
+      role="img"
+      aria-label={type}
+    >
+      <image href={`${config.path}/images/icons_${resolvedTheme}.png`} />
+    </svg>
+  );
+};
+
+
+# ------------------------------
+# File: src/components/Tooltip.tsx
+# ------------------------------
+
+"use client";
+
+import type { FC, ReactNode, CSSProperties } from "react";
+import { useState, useEffect, useRef } from "react";
+
+interface TooltipProps {
+  children: ReactNode;
+  content: ReactNode;
+  disabled?: boolean;
+  offset?: number;
+  className?: string;
+  delay?: number;
+}
+
+const Tooltip: FC<TooltipProps> = ({
+  children,
+  content,
+  disabled = false,
+  offset = 15,
+  className = "",
+  delay = 0,
+}) => {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  const [isVisible, setIsVisible] = useState(false);
+  const [isTracking, setIsTracking] = useState(false);
+  const [timeoutId, setTimeoutId] = useState(null);
+
+  const [style, setStyle] = useState<CSSProperties>({
+    left: "-9999px",
+    top: "-9999px",
+  });
+
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+
+    if (isTracking) {
+      window.addEventListener("mousemove", handleMouseMove);
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [isTracking]);
+
+  const handleMouseEnter = (e) => {
+    if (disabled) return;
+
+    setMousePos({ x: e.clientX, y: e.clientY });
+    setIsTracking(true);
+
+    if (delay > 0) {
+      const id = setTimeout(() => {
+        setIsVisible(true);
+      }, delay);
+
+      setTimeoutId(id);
+    } else {
+      setIsVisible(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
+    }
+
+    setIsVisible(false);
+    setIsTracking(false);
+  };
+
+  useEffect(() => {
+    if (!isVisible || !ref.current) return;
+
+    const rect = ref.current.getBoundingClientRect();
+
+    let x = mousePos.x + offset;
+    let y = mousePos.y + offset;
+
+    if (x + rect.width > window.innerWidth - offset) {
+      x = mousePos.x - rect.width - offset;
+    }
+
+    if (y + rect.height > window.innerHeight - offset) {
+      y = mousePos.y - rect.height - offset;
+    }
+
+    x = Math.max(offset, x);
+    y = Math.max(offset, y);
+
+    setStyle({
+      left: `${x}px`,
+      top: `${y}px`,
+    });
+  }, [isVisible, mousePos]);
+
+  return (
+    <>
+      <div
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="inline-block"
+      >
+        {children}
+      </div>
+
+      {!disabled && (
+        <div
+          ref={ref}
+          className={`
+            fixed pointer-events-none z-50 bg-black text-white dark:bg-white dark:text-black px-3 py-2
+            rounded-lg shadow-xl text-sm max-w-xs transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0 transition-none"} ${className}
+          `}
+          style={style}
+        >
+          {content}
+        </div>
+      )}
+    </>
+  );
+};
+
+export default Tooltip;
+
+
+# ------------------------------
+# File: src/components/RobloxTree/client.tsx
+# ------------------------------
+
+"use client";
+
+import type { FC, HTMLAttributes, ReactNode } from "react";
+import { useState, useContext, createContext } from "react";
+
+import dynamic from "next/dynamic";
+
+import Chevron from "../Chevron";
+import Tooltip from "../Tooltip";
+
+const RobloxIcon = dynamic(() => import("../RobloxIcon"), { ssr: false });
+
+export type TreeProps = {
+  title: ReactNode;
+  children?: ReactNode;
+  className?: string;
+};
+
+export type NodeProps = {
+  name?: ReactNode;
+  tooltip?: ReactNode;
+  children?: ReactNode;
+  className?: string;
+  type: string;
+  open?: boolean;
+  select?: boolean;
+};
+
+const DepthContext = createContext(0);
+
+export const ClientTree: FC<TreeProps> = ({
+  title,
+  children,
+  className,
+  ...props
+}) => {
+  return (
+    <DepthContext.Provider value={0}>
+      <div
+        className={
+          "text-sm rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-clip " +
+          (className || "")
+        }
+      >
+        <div className="px-4 py-3 font-semibold border-b border-neutral-200 dark:border-neutral-800">
+          {title}
+        </div>
+        <ul {...props}>{children}</ul>
+      </div>
+    </DepthContext.Provider>
+  );
+};
+
+export const ClientNode: FC<NodeProps> = ({
+  name,
+  type,
+  tooltip,
+  children,
+  className,
+  open = false,
+  select = false,
+}) => {
+  const depth = useContext(DepthContext);
+  const [isOpen, setIsOpen] = useState(open);
+
+  const toggle = () => {
+    setIsOpen((v) => !v);
+  };
+
+  const tooltipChildren = (
+    <div
+      style={{ paddingLeft: `${0.5 * (depth + 1)}rem` }}
+      className={`
+        flex items-center gap-2 select-none py-1
+        ${select ? "hover:bg-blue-300/30 dark:hover:bg-blue-900/40" : "hover:bg-neutral-200 dark:hover:bg-neutral-800"}
+        ${select ? "dark:bg-blue-800/20 bg-blue-300/20" : ""}
+        ${className || ""}
+      `}
+    >
+      {children ? (
+        <button
+          onClick={toggle}
+          className="flex items-center justify-center rounded-md"
+          aria-expanded={isOpen}
+        >
+          <Chevron
+            width="16"
+            height="16"
+            className={`transition-transform fill-current duration-200 ${
+              isOpen ? "rotate-90" : ""
+            }`}
+          />
+        </button>
+      ) : (
+        <div className="w-4 h-4" />
+      )}
+      <RobloxIcon type={type} size={18} />
+      <span>{name || type}</span>
+    </div>
+  );
+
+  return (
+    <DepthContext.Provider value={depth + 1}>
+      {tooltip !== undefined ? (
+        <Tooltip content={tooltip}>{tooltipChildren}</Tooltip>
+      ) : (
+        tooltipChildren
+      )}
+      <ul className={`flex flex-col ${isOpen ? "" : "hidden"}`}>{children}</ul>
+    </DepthContext.Provider>
+  );
+};
+
+
+# ------------------------------
+# File: src/components/RobloxTree/index.tsx
+# ------------------------------
+
+import type { FC, HTMLAttributes, ReactNode } from "react";
+import type { NodeProps, TreeProps } from "./client";
+
+import { ClientTree, ClientNode } from "./client";
+import { compileText } from "../../server_utils";
+
+export const Node: FC<NodeProps> = async (props: NodeProps) => {
+  const tooltipContent =
+    typeof props.tooltip === "string"
+      ? await compileText(props.tooltip)
+      : props.tooltip;
+
+  return (
+    <li className="flex flex-col">
+      <ClientNode {...props} tooltip={tooltipContent} />
+    </li>
+  );
+};
+
+export const Tree: FC<TreeProps> = async (props: TreeProps) => (
+  <ClientTree {...props} />
+);
+
+
+# ------------------------------
+# File: src/content/index.mdx
+# ------------------------------
+
+# VFX Forge
+
+An advanced custom VFX system.
+
+## Supported Effects
+* Particles, beams, trails
+* Meshes & Decal flipbooks
+* 3D bezier curves
+* Rock effects (rings, lines, debris)
+* Spin Models
+* Screen Effects
+
+## Animation Features
+* Multi-point bezier & line curves
+* **26** built-in cubic bezier presets (in, out, in-out) + **custom curve and effect presets**
+
+## Scripting Features
+* Global Studio API (`shared.vfx`)
+* Emit module for games
+
+## Advanced Features
+* Particle, bezier, and debris path visualization/approximation
+
+
+# ------------------------------
+# File: src/content/_meta.ts
+# ------------------------------
+
+export default {
+  index: "Home",
+  showcase: "Showcase",
+  tutorial: "Getting Started",
+  effects: "Effects",
+  module: "Emit Module",
+};
+
+
+# ------------------------------
+# File: src/content/effects/beam.mdx
+# ------------------------------
+
+import ObjRef from "../../components/ObjRef"
+
+import attr from "../../generics/attributes"
+import curves from "../../generics/curves"
+import inputs from "../../generics/inputs"
+
+# Beam
+
+Beam is a built-in visual effect.
+
+<ObjRef
+  curves={[
+    {
+      name: "Transparency_Base",
+      short: "Controls the Transparency property.",
+      inputs: [
+        inputs.NormStart,
+        inputs.NormEnd,
+        inputs.Envelope,
+        inputs.Smoothness,
+      ],
+    },
+
+    {
+      name: "Transparency_Scale",
+      short: "Applies a scaling factor to the Transparency of the Beam.",
+      long: "Applies a scaling factor on the Transparency of the Beam. Because this curve multiplies the Transparency NumberSequence, you'd usually want to set the Transparency to 1 when working with this curve.",
+      inputs: [inputs.PosStart, inputs.PosEnd],
+    },
+
+    {
+      name: "Width0",
+      short: "Controls the easing of the Width0 animation.",
+      inputs: [inputs.PosStart, inputs.PosEnd],
+    },
+
+    {
+      name: "Width1",
+      short: "Controls the easing of the Width1 animation.",
+      inputs: [inputs.PosStart, inputs.PosEnd],
+    },
+
+    curves.Speed,
+  ]}
+  attributes={[
+    attr.EmitDelay,
+    attr.EffectDuration,
+  ]}
+/>
+
+
+# ------------------------------
+# File: src/content/effects/bezier.mdx
+# ------------------------------
+
+import ObjRef from "../../components/ObjRef"
+
+import attr from "../../generics/attributes"
+import curves from "../../generics/curves"
+import inputs from "../../generics/inputs"
+
+# Bezier
+
+An effect that emits a part which follows a user-defined Bezier curve.
+
+The Bezier curve is defined by control points named in a numerical order and the tangent points inside them.
+
+- T0 is the left tangent.
+- T1 is the right tangent.
+
+The first point can only have a right tangent, and the last point can only have a left tangent.
+
+<ObjRef
+  curves={[
+    {
+      name: "Easing",
+      short: "Controls the easing of the animation along the bezier path.",
+      long: "Controls the easing of the animation along the bezier path. It can also be used as a way to control the speed.",
+      inputs: [],
+    },
+  ]}
+  attributes={[
+    attr.EmitDelay,
+    attr.EmitCount,
+    attr.EmitDuration,
+
+    {
+      name: "DestroyDelay",
+      type: "number",
+      short: "The amount of seconds to wait before destroying the emitted object after the animation is finished.",
+    },
+
+    attr.EffectDuration,
+
+    {
+      name: "SpreadAngle",
+      type: "Vector2",
+      short: "The amount of random spread applied to the initial direction of the bezier path.",
+    },
+
+    attr.Enabled,
+    attr.Rate,
+    attr.SyncPosition,
+
+    {
+      name: "EmissionDirection",
+      type: "Enum",
+      short: "Determines the initial direction of the bezier path.",
+      long: "Determines the initial direction of the bezier path.\n**Values:** Top, Bottom, Left, Right, Front, Back",
+    },
+
+    {
+      name: "Shape",
+      type: "Enum",
+      short: "The shape from which the parts are emitted.",
+      long: "The shape from which the parts are emitted.\n**Values:** Box, Cylinder, Sphere, Disc",
+    },
+
+    {
+      name: "ShapePartial",
+      type: "number",
+      short: "Controls the percentage of the shape to use for emission, from 0 to 1.",
+      long: "Controls the percentage of the shape to use for emission. A value of 0.5 will only emit from half of the shape. Only applicable for Cylinder, Sphere, and Disc.",
+    },
+
+    {
+      name: "ShapeStyle",
+      type: "Enum",
+      short: "Decides whether to emit from the entire volume or just the surface of the shape.",
+      long: "Decides whether to emit from the entire volume or just the surface of the shape.\n**Values:** Volume, Surface"
+    },
+
+    {
+      name: "ShapeFace",
+      type: "Enum",
+      short: "Controls whether the bezier path faces outwards or inwards from the shape.",
+      long: "Controls the direction the emitted object faces.\n**Values:** InAndOut, Inward, Outward",
+    },
+
+    {
+      name: "MirrorPaths",
+      type: "boolean",
+      short: "When true, the path will be mirrored if it's on the other side of the 'End' attachment.",
+    },
+
+    {
+      name: "MirrorRotation",
+      type: "Vector3",
+      short: "The rotation in degrees applied to a path when it's mirrored.",
+    },
+
+    {
+      name: "ProjectileEnabled",
+      type: "boolean",
+      short: "When true, the object will enter a projectile phase after the bezier path is completed.",
+    },
+
+    {
+      name: "ProjectileSpeed",
+      type: "number",
+      short: "The speed of the object during the projectile phase.",
+    },
+
+    {
+      name: "ProjectileLifetime",
+      type: "NumberRange",
+      short: "The minimum and maximum duration of the projectile phase.",
+    },
+
+    {
+      name: "MatchEndDirection",
+      type: "boolean",
+      short: "When true, the projectile will fly in the same direction as the 'End' attachment.",
+      long: "When true, the projectile will fly in the same direction as the 'End' attachment. If false, it will fly in the same direction as its velocity at the time the projectile phase begins.",
+    },
+
+    {
+      name: "HitboxEnabled",
+      type: "boolean",
+      short: "When true, the effect will be stopped as soon as it collides with something or reaches the end of its duration/lifetime.",
+      long: `
+When true, the effect will be stopped as soon as it collides with something or reaches the end of its duration/lifetime.
+
+> [!NOTE]
+>
+> Hitbox detection uses \`GetPartsInPart\`, so the part's size matters for collisions.
+`
+    },
+
+    {
+      name: "HitboxFilterTag",
+      type: "Enum",
+      short: "The tag used to create a part filter for hitbox detection.",
+      long: "The tag used to create a part filter for hitbox detection. The nature of the filter changes based on the 'HitboxFilterType' attribute.",
+    },
+
+    {
+      name: "HitboxFilterType",
+      type: "Enum",
+      short: "Defines the nature of the part filter used for hitbox detection.",
+      long: `Defines the nature of the part filter used for hitbox detection.
+        - Exclude - all parts inside the filter are ignored when performing a hitbox check.
+        - Include - only parts inside the filter are eligible to be detected by the hitbox.
+      `,
+    },
+
+    {
+      name: "HitboxCollisionGroup",
+      type: "string",
+      short: "The collision group to use for hitbox detection.",
+      long: "The collision group to use for hitbox detection. Parts with collision groups that cannot collide with the hitbox collision group are ignored.",
+    },
+
+    {
+      name: "HitboxIgnoreCanCollide",
+      type: "boolean",
+      short: "When true, hitboxes will ignore the 'CanCollide' property of parts.",
+    },
+
+    {
+      name: "FacePath",
+      type: "boolean",
+      short: "When true, parts will continuously align with the direction of the bezier path.",
+    },
+
+    {
+      name: "ArcSpace",
+      type: "boolean",
+      short: "When true, parts will move at a uniform speed along the path.",
+    },
+  ]}
+/>
+
+
+# ------------------------------
+# File: src/content/effects/camera_shake.mdx
+# ------------------------------
+
+import ObjRef from "../../components/ObjRef"
+
+import attr from "../../generics/attributes"
+import curves from "../../generics/curves"
+import inputs from "../../generics/inputs"
+
+# Camera Shake
+
+A camera shake effect, utilizing the Shake module from [RbxUtil](https://github.com/Sleitnick/RbxUtil).
+
+<ObjRef
+  curves={[
+    curves.Speed,
+  ]}
+  attributes={[
+    attr.EmitDelay,
+    attr.EmitDuration,
+
+    {
+      name: "Falloff",
+      type: "number",
+      short: "The radius of the sphere within which the shake is perceivable when parented to a part or an attachment.",
+    },
+
+    {
+      name: "Amplitude",
+      type: "number",
+      short: "The maximum amplitude/strength of the shake.",
+    },
+
+    {
+      name: "Frequency",
+      type: "number",
+      short: "The speed of the shake.",
+    },
+
+    {
+      name: "FadeInTime",
+      type: "number",
+      short: "The amount of seconds it takes for the shake to fade in.",
+    },
+
+    {
+      name: "FadeOutTime",
+      type: "number",
+      short: "The amount of seconds it takes for the shake to fade out.",
+    },
+
+    {
+      name: "SustainTime",
+      type: "number",
+      short: "The amount of seconds the shake is sustained for.",
+      long: `
+      The amount of seconds the shake is sustained for.
+
+      The \`EmitDuration\` attribute can also be used to achieve a prolonged shake effect.
+      In the future camera shakes may receive an \`Enabled\` attribute as a way to not rely on a fixed sustain/enabled duration.
+      `,
+    },
+
+    {
+      name: "PositionInfluence",
+      type: "Vector3",
+      short: "Similar to `Amplitude`, but only affecting the shake's influence on position of the camera, while also allowing per-axis control.",
+    },
+
+    {
+      name: "RotationInfluence",
+      type: "Vector3",
+      short: "Similar to `Amplitude`, but only affecting the shake's influence on rotation of the camera, while also allowing per-axis control.",
+    },
+  ]}
+/>
+
+
+
+# ------------------------------
+# File: src/content/effects/mesh.mdx
+# ------------------------------
+
+import ObjRef from "../../components/ObjRef"
+import { Tree, Node } from "../../components/RobloxTree"
+
+import attr from "../../generics/attributes"
+import curves from "../../generics/curves"
+import inputs from "../../generics/inputs"
+
+# Mesh
+
+Mesh VFX are 3D effects created by animating parts.
+
+Any type of 'Start' and 'End' parts within a model create a valid Mesh VFX.
+The simplest and most common way of creating mesh effects is to just use **MeshParts**.
+
+> [!NOTE]
+>
+> MeshPart and Union effects cannot be reasonably [pooled](https://en.wikipedia.org/wiki/Object_pool_pattern), which means that their CFrames are not updated in bulk.
+> Emitting a lot of these effects could impact performance more than if you were to use SpecialMeshes and basic parts.
+
+So you may want to use a simple structure like this:
+
+<Tree title="MeshPart VFX" className="mt-4">
+  <Node open type="Model">
+    <Node type="MeshPart" name="Start"/>
+    <Node type="MeshPart" name="End"/>
+  </Node>
+</Tree>
+
+The plugin also supports mesh flipbooks. You can learn more about using them in [this tutorial](/wip).
+If you either want to use flipbooks or have better performance, you will need to use this kind of structure:
+
+<Tree title="SpecialMesh & Decal VFX" className="mt-4">
+  <Node open type="Model">
+    <Node type="Part" name="Start" open>
+      <Node type="SpecialMesh"/>
+      <Node type="Decal"/>
+    </Node>
+    <Node type="Part" name="End" open>
+      <Node type="SpecialMesh"/>
+      <Node type="Decal"/>
+    </Node>
+  </Node>
+</Tree>
+
+You can have multiple decals in a mesh, just make sure the names of each decal pair are unique. Here's an example:
+
+<Tree title="Multiple Decals Example" className="mt-4">
+  <Node open type="Model">
+    <Node type="Part" name="Start" open>
+      <Node type="SpecialMesh"/>
+      <Node type="Decal" name="Wind" select/>
+      <Node type="Decal" name="Impact" select/>
+    </Node>
+    <Node type="Part" name="End" open>
+      <Node type="SpecialMesh"/>
+      <Node type="Decal" name="Wind" select/>
+      <Node type="Decal" name="Impact" select/>
+    </Node>
+  </Node>
+</Tree>
+
+That covers the basics! Keep in mind that meshes are not physics-based, meaning they do not act like particles, but rather are statically animated.
+That said, there are attributes like [SpreadAngle](#Attribute:SpreadAngle) and random rotation. You can use them to randomize your meshes and partly mimic particles.
+
+> [!NOTE]
+>
+> Note that not all properties are animated. If you want to animate an unsupported property, use [Tween Properties](tween_property).
+> All animated properties can be found in the curve summary below.
+
+<ObjRef
+  curves={[
+    {
+      name: "Part_CFrame",
+      short: "Controls the easing of the CFrame animation.",
+      long: "Controls the easing of the CFrame animation. The starting and ending CFrames can be changed by moving the Start and End parts.",
+      inputs: [],
+    },
+
+    {
+      name: "Part_Transparency",
+      short: "Controls the easing of the Transparency animation.",
+      inputs: [inputs.PosStart, inputs.PosEnd],
+    },
+
+    {
+      name: "Part_Size",
+      short: "Controls the easing of the Size animation.",
+      long: "Controls the easing of the Size animation. The starting and ending sizes can be changed by resizing the Start and End parts.",
+      inputs: [],
+    },
+
+    {
+      name: "Part_RotSpeed",
+      short: "Controls the easing of the RotSpeed animation.",
+      long: "Controls the easing of the RotSpeed animation. Only applies to non-zero init rotation axes.",
+      inputs: [inputs.RangeStart, inputs.RangeEnd],
+    },
+
+    {
+      name: "Mesh_Scale",
+      short: "Controls the easing of the Scale animation.",
+      long: "Controls the easing of the Scale animation. The starting and ending scales can be changed by editing the Scale property of the SpecialMeshes inside the Start and End parts.",
+      inputs: [],
+    },
+
+    curves.Speed,
+  ]}
+  attributes={[
+    attr.EmitDelay,
+    attr.EmitDuration,
+    attr.EffectDuration,
+
+    {
+      name: "SpreadAngle",
+      type: "Vector2",
+      short: "The amount of random spread applied to the CFrame animation.",
+      long: "The amount of random spread applied to the CFrame animation. Applied around the origin."
+    },
+
+    attr.SyncPosition,
+    attr.Enabled,
+    attr.Rate,
+
+    attr.MinInitRot,
+    attr.MaxInitRot,
+  ]}
+/>
+
+
+# ------------------------------
+# File: src/content/effects/mesh_decal.mdx
+# ------------------------------
+
+import ObjRef from "../../components/ObjRef"
+
+import attr from "../../generics/attributes"
+import curves from "../../generics/curves"
+import inputs from "../../generics/inputs"
+
+# Mesh Decals
+
+Mesh Decals are emitted by Mesh VFX.
+
+A mesh can can have any amount of decals, however every decal pair needs to have a unique name.
+To assign a flipbook to a decal, use the Mesh Flipbook Importer.
+
+<ObjRef
+  curves={[
+    {
+      name: "Transparency",
+      short: "Controls the easing of the transparency animation.",
+      inputs: [inputs.Start, inputs.End],
+    },
+    {
+      name: "Color",
+      short: "Controls the easing of the color animation.",
+      inputs: [],
+    },
+    {
+      name: "Flipbook_Change",
+      short: "Controls the easing of the transition between flipbook frames.",
+      inputs: [inputs.Duration],
+    },
+  ]}
+  attributes={[
+    {
+      name: "FlipbookEnabled",
+      type: "boolean",
+      short: "Decides whether a flipbook is played if it exists.",
+    },
+
+    {
+      name: "FlipbookTextures",
+      type: "buffer",
+      short: "An f64 packed buffer with ordered flipbook texture frame IDs.",
+      long: "An f64 packed buffer with ordered flipbook texture frame IDs. Do not edit this attribute manually, it should only be done by the flipbook importer.",
+    },
+  ]}
+/>
+
+
+
+# ------------------------------
+# File: src/content/effects/particle.mdx
+# ------------------------------
+
+import ObjRef from "../../components/ObjRef"
+
+import attr from "../../generics/attributes"
+import curves from "../../generics/curves"
+import inputs from "../../generics/inputs"
+
+# Particle
+
+ParticleEmitters are the most commonly used built-in VFX instances.
+
+<ObjRef
+  curves={[
+    curves.SeqTransparency,
+    curves.SeqSize,
+    curves.SeqSquash,
+    {
+      name: "TimeScale",
+      short: "Controls the easing of the TimeScale animation.",
+      long: "Controls the easing of the TimeScale animation. Values can only range from 0 to 1 - a Roblox limitation.",
+      inputs: [
+        inputs.Duration,
+        inputs.NormStart,
+        inputs.NormEnd,
+      ]
+    },
+  ]}
+  attributes={[
+    attr.EmitCount,
+    attr.EmitDelay,
+    attr.EmitDuration,
+  ]}
+/>
+
+
+# ------------------------------
+# File: src/content/effects/screen_effect.mdx
+# ------------------------------
+
+import ObjRef from "../../components/ObjRef"
+
+import attr from "../../generics/attributes"
+import curves from "../../generics/curves"
+import inputs from "../../generics/inputs"
+
+# Screen Effect
+
+An effect that resizes and positions a part to fill the camera's viewport. This is used as a container for other effects that are meant to be displayed in front of the camera.
+
+<ObjRef
+  curves={[]}
+  attributes={[
+    {
+      name: "Enabled",
+      type: "boolean",
+      short: "Determines whether the part is considered a screen effect.",
+    },
+
+    {
+      name: "PartDistance",
+      type: "number",
+      short: "The distance from the camera to the screen part in studs.",
+      long: "The distance from the camera to the screen part. This can be used to control the perceived size and perspective of the screen effect.",
+    },
+
+    {
+      name: "PartScale",
+      type: "Vector2",
+      short: "The scaling factor applied to the part's size after it has been sized to the screen.",
+    },
+
+    {
+      name: "OffsetPosition",
+      type: "Vector3",
+      short: "The positional offset from the center of the camera's view.",
+      long: "The positional offset applied to the part after it has been positioned in front of the camera.",
+    },
+
+    {
+      name: "OffsetRotation",
+      type: "Vector3",
+      short: "The rotational offset in degrees applied to the screen part.",
+      long: "The rotational offset in degrees applied to the screen part after it has been positioned in front of the camera. The rotation is applied around the part's center.",
+    },
+  ]}
+/>
+
+
+
+# ------------------------------
+# File: src/content/effects/shockwave.mdx
+# ------------------------------
+
+import ObjRef from "../../components/ObjRef"
+
+import attr from "../../generics/attributes"
+import curves from "../../generics/curves"
+import inputs from "../../generics/inputs"
+
+# Shockwave
+
+This is a parent class used to define the raycasting behavior of ring, line, and debris effects.
+
+<ObjRef
+  curves={[]}
+  attributes={[
+    {
+      name: "RayDirection",
+      type: "Vector3",
+      short: "The direction and magnitude of the raycast from the origin attachment.",
+    },
+
+    {
+      name: "RayCollisionGroup",
+      type: "string",
+      short: "The collision group used for raycasting.",
+      long: "The collision group used for raycasting. Parts with collision groups that cannot collide with the ray's collision group are ignored."
+    },
+
+    {
+      name: "FilterTag",
+      type: "string",
+      short: "The tag used to create a part filter for raycasting.",
+      long: "The tag used to create a part filter for raycasting. The nature of the filter changes based on the 'FilterType' attribute.",
+    },
+
+    {
+      name: "FilterType",
+      type: "Enum",
+      short: "Defines the nature of the part filter used for raycasting.",
+      long: `Defines the nature of the part filter used for raycasting.
+        - Exclude - all parts inside the filter are ignored by the ray.
+        - Include - only parts inside the filter can be hit by the ray.
+      `,
+    },
+
+    {
+      name: "IgnoreWater",
+      type: "boolean",
+      short: "When true, rays will ignore water terrain.",
+    },
+
+    {
+      name: "IgnoreCanCollide",
+      type: "boolean",
+      short: "When true, rays will ignore the 'CanCollide' property of parts.",
+    },
+  ]}
+/>
+
+
+# ------------------------------
+# File: src/content/effects/shockwave_debris.mdx
+# ------------------------------
+
+import ObjRef from "../../components/ObjRef"
+
+import attr from "../../generics/attributes"
+import curves from "../../generics/curves"
+import inputs from "../../generics/inputs"
+
+# Shockwave Debris
+
+An effect that emits a number of physics-based parts, which are launched from the origin with random velocities and spins. It can optionally inherit the material and color from nearby parts.
+
+<ObjRef
+  curves={[
+    curves.ShockSize,
+    curves.ShockTransparency,
+  ]}
+  attributes={[
+    attr.EmitDelay,
+
+    {
+      name: "Amount",
+      type: "NumberRange",
+      short: "The minimum and maximum number of debris parts to emit.",
+    },
+
+    {
+      name: "Lifetime",
+      type: "NumberRange",
+      short: "The minimum and maximum lifetime of a debris part in seconds.",
+    },
+
+    {
+      name: "InheritanceEnabled",
+      type: "boolean",
+      short: "When true, debris will attempt to inherit material, color, and transparency from parts near the origin.",
+    },
+
+    {
+      name: "InheritanceRadius",
+      type: "number",
+      short: "The radius to check for parts to inherit properties from.",
+    },
+
+    {
+      name: "InheritanceMaxResults",
+      type: "number",
+      short: "The maximum number of parts to check within the radius for inheritance.",
+    },
+
+    {
+      name: "LinearMagnitude",
+      type: "NumberRange",
+      short: "The minimum and maximum magnitude of the initial linear velocity.",
+    },
+
+    {
+      name: "AngularMagnitude",
+      type: "NumberRange",
+      short: "The minimum and maximum magnitude of the initial angular velocity.",
+    },
+
+    attr.SizeScaleEnd,
+    attr.MinSize,
+    attr.MaxSize,
+
+    {
+      name: "MinDirection",
+      type: "Vector3",
+      short: "The minimum direction unit vector for the linear impulse relative to the origin.",
+    },
+
+    {
+      name: "MaxDirection",
+      type: "Vector3",
+      short: "The maximum direction unit vector for the linear impulse relative to the origin.",
+    },
+  ]}
+/>
+
+
+# ------------------------------
+# File: src/content/effects/shockwave_line.mdx
+# ------------------------------
+
+import ObjRef from "../../components/ObjRef"
+
+import attr from "../../generics/attributes"
+import curves from "../../generics/curves"
+import inputs from "../../generics/inputs"
+
+# Shockwave Line
+
+An effect that emits parts in a straight line from its origin.
+
+<ObjRef
+  curves={[
+    curves.ShockSize,
+    curves.ShockTransparency,
+
+    {
+      name: "Scale",
+      short: "Controls the scale of rocks over the line's duration.",
+      inputs: [
+        inputs.Start,
+        inputs.End,
+      ],
+    },
+
+    {
+      name: "Path",
+      short: "Determines the easing in which the rocks travel along the line.",
+      inputs: [],
+    },
+
+    {
+      name: "Rate",
+      short: "Determines how many rocks are created per second.",
+      inputs: [
+        inputs.Start,
+        inputs.End,
+      ],
+    },
+  ]}
+  attributes={[
+    attr.EmitDelay,
+
+    {
+      name: "Duration",
+      type: "number",
+      short: "The amount of time in which the length goal is reached.",
+    },
+
+    {
+      name: "Lifetime",
+      type: "NumberRange",
+      short: "The minimum and maximum lifetime of a rock.",
+    },
+
+    attr.SyncPosition,
+
+    {
+      name: "Length",
+      type: "number",
+      short: "The length of the line.",
+    },
+
+    {
+      name: "Direction",
+      type: "Vector3",
+      short: "The direction of the line relative to the origin's CFrame.",
+    },
+
+    {
+      name: "Rotation",
+      type: "NumberRange",
+      short: "The minimum and maximum rotation of a rock on the Y axis.",
+    },
+
+    attr.MinSize,
+    attr.MaxSize,
+    attr.SizeScaleStart,
+    attr.SizeScaleEnd,
+  ]}
+/>
+
+
+# ------------------------------
+# File: src/content/effects/shockwave_ring.mdx
+# ------------------------------
+
+import ObjRef from "../../components/ObjRef"
+
+import attr from "../../generics/attributes"
+import curves from "../../generics/curves"
+import inputs from "../../generics/inputs"
+
+# Shockwave Ring
+
+An effect that emits a series of parts in a ring, raycasting downwards from a specified origin to find a surface to place them on.
+
+<ObjRef
+  curves={[
+    curves.ShockSize,
+    curves.ShockTransparency,
+  ]}
+  attributes={[
+    attr.EmitDelay,
+
+    {
+      name: "Radius",
+      type: "number",
+      short: "The radius of the ring.",
+    },
+
+    {
+      name: "Segments",
+      type: "number",
+      short: "The number of parts forming the ring.",
+    },
+
+    {
+      name: "Lifetime",
+      type: "NumberRange",
+      short: "The minimum and maximum lifetime of a segment.",
+    },
+
+    attr.MinSize,
+    attr.MaxSize,
+    attr.SizeScaleStart,
+    attr.SizeScaleEnd,
+  ]}
+/>
+
+
+# ------------------------------
+# File: src/content/effects/spin_model.mdx
+# ------------------------------
+
+import ObjRef from "../../components/ObjRef"
+
+import attr from "../../generics/attributes"
+import curves from "../../generics/curves"
+import inputs from "../../generics/inputs"
+
+# Spin Model
+
+An effect that applies continuous rotation and/or scaling to a model. The model's pivot point is used as the center of rotation and scaling.
+
+<ObjRef
+  curves={[
+    {
+      name: "Scale_Curve",
+      short: "Controls the easing of the scale animation.",
+      inputs: [
+        {
+          name: "Start",
+          desc: "The starting value of the curve.",
+          range: [0.001, "inf"],
+        }, 
+        {
+          name: "Start",
+          desc: "The starting value of the curve.",
+          range: [0.001, "inf"],
+        },
+      ],
+    },
+    {
+      name: "SpinSpeed_Curve",
+      short: "Controls the speed of the spin.",
+      long: "Controls the speed of the spin. If it becomes negative, the model will start spinning in the opposite direction.",
+      inputs: [inputs.Duration, inputs.Start, inputs.End],
+    },
+  ]}
+  attributes={[
+    attr.EmitDelay,
+
+    {
+      name: "SpinRotation",
+      type: "Vector3",
+      short: "The rotation in degrees applied to the model per second.",
+    },
+
+    {
+      name: "SpinDuration",
+      type: "number",
+      short: "The duration of the spin in seconds.",
+    },
+    
+    attr.SyncPosition,
+  ]}
+/>
+
+
+# ------------------------------
+# File: src/content/effects/_meta.ts
+# ------------------------------
+
+export default {
+  particle: "Particle",
+  beam: "Beam",
+  mesh: "Mesh",
+  mesh_decal: "Mesh Decal",
+  bezier: "Bezier",
+  spin_model: "Spin Model",
+  camera_shake: "Camera Shake",
+  screen_effect: "Screen Effect",
+  shockwave: "Shockwave",
+  shockwave_ring: "Shockwave Ring",
+  shockwave_line: "Shockwave Line",
+  shockwave_debris: "Shockwave Debris",
+};
+
+
+# ------------------------------
+# File: src/content/module/faq.mdx
+# ------------------------------
+
+## How can I know this module is not a backdoor?
+
+A backdoor is a server-side script whose goal usually is to allow exploiters to execute server-side code in your game.
+There is no way for this module to do that if you only initialize it on the client.
+
+## How performant is the emit module?
+
+I try to make the module have as little impact on performance as possible by using optimization tactics such as [object pooling](https://en.wikipedia.org/wiki/Object_pool_pattern) and bulk CFrame movement.
+If you want to improve the performance of the module, contributions to the GitHub [repository](https://github.com/zilibobi/forge-vfx/) are always welcome.
+
+
+# ------------------------------
+# File: src/content/module/installation.mdx
+# ------------------------------
+
+import { Steps } from "nextra/components"
+
+## License
+The emit module is licensed under a custom source-available copyleft license which **<u>only allows usage within Roblox games</u>**. That said, feel free to contribute and report bugs.
+
+## Installation
+
+#### Using Wally
+
+```sh
+ForgeVFX = "zilibobi/forge-vfx"
+```
+
+#### Manual
+
+Check the [releases page](https://github.com/zilibobi/forge-vfx/releases/latest) for prebuilt `.rbxm` files.
+
+
+# ------------------------------
+# File: src/content/module/usage.mdx
+# ------------------------------
+
+## Initialization
+
+The module has a very simple interface. All you need to do to get started is initialize the module on the client:
+
+```luau filename="initialize.client.luau"
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local vfx = require(ReplicatedStorage.ForgeVFX) -- Replace with the path to wherever you put the module
+
+vfx.init()
+```
+
+To stop the module, call the `deinit` method.
+
+```luau filename="initialize.client.luau"
+vfx.deinit()
+```
+
+---
+
+You can also optionally initialize the module on the server.
+All it does is create the collision groups ussed by certain effects.
+
+Check the [replication example](../examples/basic_replication) for a simple replication setup.
+
+## Usage
+
+After initializing, you can call the `emit` method and pass the effects you want to emit to it.
+
+```luau filename="initialize.client.luau"
+vfx.emit(workspace.Effect)
+```
+
+This method returns an object describing the status of the emit request:
+
+```luau filename="initialize.client.luau"
+local env = vfx.emit(workspace.Effect)
+
+env.Finished:finally(function()
+  print("effect finished emitting!")
+end)
+```
+
+```luau
+type env = {
+  Finished: Promise,
+}
+```
+
+The module is also exposed inside `shared.vfx`, so you can do this in another script:
+
+```luau filename="effects.client.luau"
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Effects = ReplicatedStorage:WaitForChild("VFX")
+
+shared.vfx.emit(Effects.Explosion, Effects.Wind)
+```
+
+
+# ------------------------------
+# File: src/content/module/_meta.ts
+# ------------------------------
+
+export default {
+  installation: "Installation",
+  usage: "Usage",
+  faq: "FAQ",
+  examples: "Examples",
+};
+
+
+# ------------------------------
+# File: src/content/module/examples/basic_replication.mdx
+# ------------------------------
+
+import ModuleInit from "../../../templates/ModuleInit.mdx"
+import { Tree, Node } from "../../../components/RobloxTree"
+
+<ModuleInit />
+
+### Networking setup
+
+Now, we need to listen to emit requests from the server.
+Create a 'Remotes' folder in ReplicatedStorage and insert a RemoteEvent called 'Emit'.
+
+<Tree title="Networking Setup" className="mt-4">
+  <Node open type="ReplicatedStorage">
+    <Node type="ModuleScript" name="ForgeVFX"/>
+    <Node open type="Folder" name="Remotes">
+      <Node type="RemoteEvent" name="Emit"/>
+    </Node>
+  </Node>
+</Tree>
+
+> [!TIP]
+>
+> It's more performant to use UnreliableRemoteEvents instead of RemoteEvents for effect replication. The code below works with both event types.
+
+This code listens to emit requests from the server and calls whatever method the server wants, passing all of the remaining arguments to it.
+
+```luau filename="forge_init.client.luau"
+local remote = ReplicatedStorage.Remotes.Emit
+
+remote.OnClientEvent:Connect(function(method: string, ...)
+  local func = vfx[method]
+
+  if not func then
+    warn(`The server attempted to call a non-existent method '{method}' of the emit module!`)
+    return
+  end
+
+  func(...)
+end)
+```
+
+## On the server
+
+Now that you have each client with an initialized module, ready to emit effects, you can start sending out emit events.
+
+### Utility module
+
+Create a ModuleScript inside ServerStorage. The location of this module is not detrimental, so feel free to put it somewhere else.
+
+<Tree title="Utility Module Setup" className="mt-4">
+  <Node open type="ServerStorage">
+    <Node type="ModuleScript" name="emit_utility"/>
+  </Node>
+</Tree>
+
+Let's define some useful methods that we can call in our server-side code.
+
+```luau filename="emit_utility.luau"
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Emit = ReplicatedStorage.Remotes.Emit
+
+local utility = {}
+
+function utility.emit(...: Instance)
+  Emit:FireAllClients("emit", ...)
+end
+
+function utility.emitForPlayers(players: { Player }, ...: Instance)
+  for _, player in players do
+    Emit:FireClient(player, "emit", ...)
+  end
+end
+
+function utility.emitExcludingPlayers(players: { Player }, ...: Instance)
+  for _, player in Players:GetPlayers() do
+    if table.find(players, player) then
+      continue
+    end
+
+    Emit:FireClient(player, "emit", ...)
+  end
+end
+
+return utility
+```
+
+### Example usage
+
+We can now replicate VFX using our new utility module!
+
+```luau filename="example_emit.server.luau"
+local Players = game:GetService("Players")
+local ServerStorage = game:GetService("ServerStorage")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Effects = ReplicatedStorage:WaitForChild("VFX")
+
+local emit_utility = require(ServerStorage.emit_utility)
+
+-- emit for everyone
+emit_utility.emit(Effects.Explosion)
+
+Players.PlayerAdded:Connect(function(player)
+  -- emit only for this player
+  emit_utility.emitForPlayers({ player }, Effects.Wind)
+
+  -- emit for other players
+  emit_utility.emitExcludingPlayers({ player }, Effects.Explosion)
+end)
+```
+
+
+# ------------------------------
+# File: src/content/module/examples/emit_on_key.mdx
+# ------------------------------
+
+import ModuleInit from "../../../templates/ModuleInit.mdx"
+
+<ModuleInit />
+
+### Detecting key presses
+
+The code below emits the 'Explosion' effect inside the 'VFX' folder in ReplicatedStorage.
+
+```luau filename="forge_init.client.luau"
+local UserInputService = game:GetService("UserInputService")
+
+local Effects = ReplicatedStorage:WaitForChild("VFX")
+
+local EMIT_KEY = Enum.KeyCode.E
+
+UserInputService.InputBegan:Connect(function(input, ignore)
+  if ignore or input.KeyCode ~= EMIT_KEY then
+    return
+  end
+
+  -- Now emit whatever effects you want
+  vfx.emit(Effects.Explosion)
+end)
+```
+
+
+# ------------------------------
+# File: src/content/tutorial/attributes.mdx
+# ------------------------------
+
+# Summary
+
+The Attributes window allows you to edit all currently selected effects.
+It's also the window where you can toggle all of the effect features such as texture loading, particle path visualization, and other utilities.
+
+
+# ------------------------------
+# File: src/content/tutorial/curve_editor.mdx
+# ------------------------------
+
+# Summary
+
+The Curve Editor allows you to change how each individual property is animated for the currently selected effects.
+
+## Points
+
+Points are the root of your curve.
+
+You can create a new point by holding `ctrl` and clicking where you want the point to be on the canvas, or by bringing
+up the context menu and selecting 'New Point' by clicking on the canvas without holding the `ctrl` key.
+
+### Point Tooltips
+
+Tooltips can be brought up by hovering over a point.
+
+All curves are normalized by nature - they aren't bound by their Start and End values.
+Tooltips help you understand where a point is in time and what its value is.
+
+You can make a tooltip show its delta (the difference in time and value from the last point) by holding `shift`.
+
+### Point Shifting
+
+Imagine a scenario where you set up a curve for TimeScale, but then you decided to change the duration of the curve
+and now all of the points have different times.
+
+It would be very tedious to shift each point again to have the same Time. Instead, use the point shifter from the
+context menu to offset all points based on the old and new values (in this case it's the duration).
+
+### Loading Curves
+
+If you applied a curve to an effect, you can load it back into the editor from the context menu. This only works with curves created by the plugin.
+
+## Presets
+
+Presets are listed in the sidebar and can be created by clicking on the '+' icon above it. Custom presets are listed
+at the very bottom and have a context menu you can use to delete, rename, and update a preset.
+
+### Curve Presets
+
+Curve presets only replace the curve for the currently selected property.
+
+### Effect Presets
+
+Effect presets can be distinguished by their icon behind the preset name.
+
+Applying an effect preset replaces curves and inputs for all properties (it only replaces the inputs edited at the time of creating the preset).
+
+
+# ------------------------------
+# File: src/content/tutorial/installation.mdx
+# ------------------------------
+
+import { Steps } from "nextra/components"
+
+## Creator Store
+
+This purchasing method is recommended, as you will get automatic updates in Studio.
+
+<Steps>
+### Purchase with Stripe
+Go to the [Creator Store page](<https://create.roblox.com/store/asset/133927382668067/VFX-Forge>) and install the plugin.
+
+> [!NOTE]
+> 
+> Use any of the other options if you can't purchase the plugin in your region.
+
+### Install
+Click on the 'Open in Studio' button and then the 'Install' button in Studio.
+</Steps>
+
+## Itch.io
+
+<Steps>
+### Purchase with PayPal / Stripe
+
+Go to the [Itch.io page](<https://zilibobi.itch.io/vfx-forge>) of the plugin and purchase.
+
+### Install
+Install using the local installation method below.
+</Steps>
+
+## Robux
+
+<Steps>
+### Purchase the T-Shirt
+Buy the T-Shirt [here](<https://www.roblox.com/catalog/78035112584681/VFX-Forge>).
+
+### Connect your Roblox account
+To get access to the plugin file, get your buyer role in the `#buyer-role` channel in our Discord server.
+
+### Install
+Download the latest plugin file inside the `#update-files` channel and install using the local installation method below.
+</Steps>
+
+## Installing locally
+
+1. Go to the 'Plugins' tab in Studio
+2. Put the .rbxm file into the 'Plugins Folder'
+3. Restart Studio if needed
+
+
+# ------------------------------
+# File: src/content/tutorial/_meta.ts
+# ------------------------------
+
+export default {
+  installation: "Installation",
+
+  new_vfx: "New VFX",
+  attributes: "Attributes",
+  curve_editor: "Curve Editor",
+  utilities: "Utilities",
+};
+
+
+# ------------------------------
+# File: src/data/icons_dark_map.json
+# ------------------------------
+
+{"Accessory":[0,0,48,48],"Actor":[50,0,48,48],"AdGui":[100,0,48,48],"AdPortal":[150,0,48,48],"AirController":[200,0,48,48],"AlignOrientation":[250,0,48,48],"AlignPosition":[300,0,48,48],"AngularVelocity":[350,0,48,48],"Animation":[400,0,48,48],"AnimationConstraint":[450,0,48,45],"AnimationController":[500,0,48,48],"AnimationFromVideoCreatorService":[550,0,48,48],"Animator":[600,0,48,48],"ArcHandles":[650,0,48,48],"Atmosphere":[700,0,48,48],"Attachment":[750,0,48,48],"AudioAnalyzer":[800,0,48,48],"AudioChannelMixer":[850,0,48,48],"AudioChannelSplitter":[900,0,48,48],"AudioChorus":[950,0,48,48],"AudioCompressor":[1000,0,48,48],"AudioDeviceInput":[1050,0,48,48],"AudioDeviceOutput":[1100,0,48,48],"AudioDistortion":[1150,0,48,48],"AudioEcho":[1200,0,48,48],"AudioEmitter":[1250,0,48,48],"AudioEqualizer":[1300,0,48,48],"AudioFader":[1350,0,48,48],"AudioFilter":[1400,0,48,48],"AudioFlanger":[1450,0,48,48],"AudioGate":[1500,0,48,48],"AudioLimiter":[1550,0,48,48],"AudioListener":[1600,0,48,48],"AudioPitchShifter":[1650,0,48,48],"AudioPlayer":[1700,0,48,48],"AudioRecorder":[1750,0,48,48],"AudioReverb":[1800,0,48,48],"AudioSpeechToText":[1850,0,48,48],"AudioTextToSpeech":[1900,0,48,48],"AuroraScript":[1950,0,48,48],"AvatarEditorService":[2000,0,48,48],"AvatarSettings":[0,50,48,48],"Backpack":[50,50,48,48],"BallSocketConstraint":[100,50,48,48],"BasePlate":[150,50,48,48],"Beam":[200,50,48,48],"BillboardGui":[250,50,48,48],"BindableEvent":[300,50,48,48],"BindableFunction":[350,50,48,48],"BlockMesh":[400,50,48,48],"BloomEffect":[450,50,48,48],"BlurEffect":[500,50,48,48],"BodyAngularVelocity":[550,50,48,48],"BodyColors":[600,50,48,48],"BodyForce":[650,50,48,48],"BodyGyro":[700,50,48,48],"BodyPosition":[750,50,48,48],"BodyThrust":[800,50,48,48],"BodyVelocity":[850,50,48,48],"Bone":[900,50,48,48],"BoolValue":[950,50,48,48],"BoxHandleAdornment":[1000,50,48,48],"Breakpoint":[1050,50,48,48],"BrickColorValue":[1100,50,48,48],"BubbleChatConfiguration":[1150,50,48,48],"Buggaroo":[1200,50,48,48],"CFrameValue":[1250,50,48,48],"Camera":[1300,50,48,48],"CanvasGroup":[1350,50,48,48],"ChannelTabsConfiguration":[1400,50,48,48],"CharacterControllerManager":[1450,50,48,48],"CharacterMesh":[1500,50,48,48],"Chat":[1550,50,48,48],"ChatInputBarConfiguration":[1600,50,48,48],"ChatWindowConfiguration":[1650,50,48,48],"ChorusSoundEffect":[1700,50,48,48],"Class":[1750,50,48,48],"Cleanup":[1800,50,48,48],"ClickDetector":[1850,50,48,48],"ClientReplicator":[1900,50,48,48],"ClimbController":[1950,50,48,48],"Clouds":[2000,50,48,48],"Color":[0,100,48,48],"ColorCorrectionEffect":[50,100,48,48],"CompressorSoundEffect":[100,100,48,48],"ConeHandleAdornment":[150,100,48,48],"Configuration":[200,100,48,48],"Constant":[250,100,48,48],"Constructor":[300,100,48,48],"Controller":[350,100,48,36],"CoreGui":[400,100,48,48],"CornerWedgePart":[450,100,48,48],"CylinderHandleAdornment":[500,100,48,48],"CylindricalConstraint":[550,100,48,48],"Decal":[600,100,48,48],"DepthOfFieldEffect":[650,100,48,48],"Dialog":[700,100,48,48],"DialogChoice":[750,100,48,48],"DistortionSoundEffect":[800,100,48,48],"DragDetector":[850,100,48,48],"EchoSoundEffect":[900,100,48,48],"EditableImage":[950,100,48,48],"EditableMesh":[1000,100,48,48],"Enum":[1050,100,48,48],"EnumMember":[1100,100,48,48],"EqualizerSoundEffect":[1150,100,48,48],"Event":[1200,100,48,48],"Explosion":[1250,100,48,48],"FaceControls":[1300,100,48,48],"Field":[1350,100,48,48],"File":[1400,100,48,48],"Fire":[1450,100,48,48],"FlangeSoundEffect":[1500,100,48,48],"Folder":[1550,100,48,48],"ForceField":[1600,100,48,48],"Frame":[1650,100,48,48],"Function":[1700,100,48,48],"GameSettings":[1750,100,48,48],"GroundController":[1800,100,48,48],"Handles":[1850,100,48,48],"HapticEffect":[1900,100,48,48],"HapticService":[1950,100,48,48],"HeightmapImporterService":[2000,100,48,48],"Highlight":[0,150,48,48],"HingeConstraint":[50,150,48,48],"Humanoid":[100,150,48,48],"HumanoidDescription":[150,150,48,48],"IKControl":[200,150,48,48],"ImageButton":[250,150,48,48],"ImageHandleAdornment":[300,150,48,48],"ImageLabel":[350,150,48,48],"InputAction":[400,150,48,48],"InputBinding":[450,150,48,48],"InputContext":[500,150,48,48],"Interface":[550,150,48,48],"IntersectOperation":[600,150,48,48],"Keyword":[650,150,48,48],"Lighting":[700,150,48,48],"LineForce":[750,150,48,48],"LineHandleAdornment":[800,150,48,48],"LinearVelocity":[850,150,48,48],"LocalFile":[900,150,48,48],"LocalScript":[950,150,48,48],"LocalizationService":[1000,150,48,48],"LocalizationTable":[1050,150,48,48],"MaterialService":[1100,150,48,48],"MaterialVariant":[1150,150,48,48],"MemoryStoreService":[1200,150,48,48],"MeshPart":[1250,150,48,48],"Meshparts":[1300,150,48,48],"MessagingService":[1350,150,48,48],"Method":[1400,150,48,48],"Model":[1450,150,48,48],"Modelgroups":[1500,150,48,48],"Module":[1550,150,48,48],"ModuleScript":[1600,150,48,48],"Motor6D":[1650,150,48,48],"NegateOperation":[1700,150,48,48],"NetworkClient":[1750,150,48,48],"NoCollisionConstraint":[1800,150,48,48],"Operator":[1850,150,48,48],"PackageLink":[1900,150,48,48],"Pants":[1950,150,48,48],"Part":[2000,150,48,48],"ParticleEmitter":[0,200,48,48],"Path2D":[50,200,48,48],"PathfindingLink":[100,200,48,48],"PathfindingModifier":[150,200,48,48],"PathfindingService":[200,200,48,48],"PitchShiftSoundEffect":[250,200,48,48],"Place":[300,200,48,48],"Plane":[350,200,48,48],"PlaneConstraint":[400,200,48,48],"Player":[450,200,48,48],"Players":[500,200,48,48],"PluginGuiService":[550,200,48,48],"PointLight":[600,200,48,48],"PrismaticConstraint":[650,200,48,48],"Property":[700,200,48,48],"ProximityPrompt":[750,200,48,48],"PublishService":[800,200,48,48],"Reference":[850,200,48,48],"RemoteEvent":[900,200,48,48],"RemoteFunction":[950,200,48,48],"RenderingTest":[1000,200,48,48],"ReplicatedFirst":[1050,200,48,48],"ReplicatedScriptService":[1100,200,48,48],"ReplicatedStorage":[1150,200,48,48],"ReverbSoundEffect":[1200,200,48,48],"RigidConstraint":[1250,200,48,48],"RobloxPluginGuiService":[1300,200,48,48],"RocketPropulsion":[1350,200,48,48],"RodConstraint":[1400,200,48,48],"RopeConstraint":[1450,200,48,48],"Rotate":[1500,200,48,48],"ScreenGui":[1550,200,48,48],"Script":[1600,200,48,48],"ScrollingFrame":[1650,200,48,48],"Seat":[1700,200,48,48],"Selected_Workspace":[1750,200,48,48],"SelectionBox":[1800,200,48,48],"SelectionSphere":[1850,200,48,48],"ServerScriptService":[1900,200,48,48],"ServerStorage":[1950,200,48,48],"Service":[2000,200,48,48],"Shirt":[0,250,48,48],"ShirtGraphic":[50,250,48,48],"SkinnedMeshPart":[100,250,48,48],"Sky":[150,250,48,48],"Smoke":[200,250,48,48],"Snap":[250,250,48,48],"Snippet":[300,250,48,48],"SocialService":[350,250,48,48],"Sound":[400,250,48,48],"SoundEffect":[450,250,48,48],"SoundGroup":[500,250,48,48],"SoundService":[550,250,48,48],"Sparkles":[600,250,48,48],"SpawnLocation":[650,250,48,48],"SpecialMesh":[700,250,48,48],"SphereHandleAdornment":[750,250,48,48],"SpotLight":[800,250,48,48],"SpringConstraint":[850,250,48,48],"StandalonePluginScripts":[900,250,48,48],"StarterCharacterScripts":[950,250,48,48],"StarterGui":[1000,250,48,48],"StarterPack":[1050,250,48,48],"StarterPlayer":[1100,250,48,48],"StarterPlayerScripts":[1150,250,48,48],"Struct":[1200,250,48,48],"StyleDerive":[1250,250,48,48],"StyleLink":[1300,250,48,48],"StyleRule":[1350,250,48,48],"StyleSheet":[1400,250,48,48],"SunRaysEffect":[1450,250,48,48],"SurfaceAppearance":[1500,250,48,48],"SurfaceGui":[1550,250,48,48],"SurfaceLight":[1600,250,48,48],"SurfaceSelection":[1650,250,48,48],"SwimController":[1700,250,48,48],"TaskScheduler":[1750,250,48,48],"Team":[1800,250,48,48],"Teams":[1850,250,48,48],"Terrain":[1900,250,48,48],"TerrainDetail":[1950,250,48,48],"TestService":[2000,250,48,48],"TextBox":[0,300,48,48],"TextBoxService":[50,300,48,48],"TextButton":[100,300,48,48],"TextChannel":[150,300,48,48],"TextChatCommand":[200,300,48,48],"TextChatService":[250,300,48,48],"TextLabel":[300,300,48,48],"TextString":[350,300,48,48],"Texture":[400,300,48,48],"Tool":[450,300,48,48],"Torque":[500,300,48,48],"TorsionSpringConstraint":[550,300,48,48],"Trail":[600,300,48,48],"TremoloSoundEffect":[650,300,48,48],"TrussPart":[700,300,48,48],"TypeParameter":[750,300,48,48],"UGCValidationService":[800,300,48,48],"UIAspectRatioConstraint":[850,300,48,48],"UICorner":[900,300,48,48],"UIDragDetector":[950,300,48,48],"UIFlexItem":[1000,300,48,45],"UIGradient":[1050,300,48,48],"UIGridLayout":[1100,300,48,48],"UIListLayout":[1150,300,48,48],"UIPadding":[1200,300,48,48],"UIPageLayout":[1250,300,48,48],"UIScale":[1300,300,48,48],"UISizeConstraint":[1350,300,48,48],"UIStroke":[1400,300,48,48],"UITableLayout":[1450,300,48,48],"UITextSizeConstraint":[1500,300,48,48],"UnionOperation":[1550,300,48,48],"Unit":[1600,300,48,48],"UniversalConstraint":[1650,300,48,48],"UnreliableRemoteEvent":[1700,300,48,48],"UpdateAvailable":[1750,300,48,48],"UserService":[1800,300,48,48],"VRService":[1850,300,48,48],"Value":[1900,300,48,48],"Variable":[1950,300,48,48],"VectorForce":[2000,300,48,48],"VehicleSeat":[0,350,48,48],"VideoDisplay":[50,350,48,48],"VideoFrame":[100,350,48,48],"VideoPlayer":[150,350,48,48],"ViewportFrame":[200,350,48,48],"VirtualUser":[250,350,48,48],"VoiceChannel":[300,350,48,48],"VoiceChatService":[350,350,48,48],"Voicechat":[400,350,48,48],"WedgePart":[450,350,48,48],"Weld":[500,350,48,48],"WeldConstraint":[550,350,48,48],"Wire":[600,350,48,48],"WireframeHandleAdornment":[650,350,48,48],"Workspace":[700,350,48,48],"WorldModel":[750,350,48,48],"WrapDeformer":[800,350,48,48],"WrapLayer":[850,350,48,48],"WrapTarget":[900,350,48,48]}
+
+# ------------------------------
+# File: src/data/icons_light_map.json
+# ------------------------------
+
+{"Accessory":[0,0,48,48],"Actor":[50,0,48,48],"AdGui":[100,0,48,48],"AdPortal":[150,0,48,48],"AirController":[200,0,48,48],"AlignOrientation":[250,0,48,48],"AlignPosition":[300,0,48,48],"AngularVelocity":[350,0,48,48],"Animation":[400,0,48,48],"AnimationConstraint":[450,0,48,45],"AnimationController":[500,0,48,48],"AnimationFromVideoCreatorService":[550,0,48,48],"Animator":[600,0,48,48],"ArcHandles":[650,0,48,48],"Atmosphere":[700,0,48,48],"Attachment":[750,0,48,48],"AudioAnalyzer":[800,0,48,48],"AudioChannelMixer":[850,0,48,48],"AudioChannelSplitter":[900,0,48,48],"AudioChorus":[950,0,48,48],"AudioCompressor":[1000,0,48,48],"AudioDeviceInput":[1050,0,48,48],"AudioDeviceOutput":[1100,0,48,48],"AudioDistortion":[1150,0,48,48],"AudioEcho":[1200,0,48,48],"AudioEmitter":[1250,0,48,48],"AudioEqualizer":[1300,0,48,48],"AudioFader":[1350,0,48,48],"AudioFilter":[1400,0,48,48],"AudioFlanger":[1450,0,48,48],"AudioGate":[1500,0,48,48],"AudioLimiter":[1550,0,48,48],"AudioListener":[1600,0,48,48],"AudioPitchShifter":[1650,0,48,48],"AudioPlayer":[1700,0,48,48],"AudioRecorder":[1750,0,48,48],"AudioReverb":[1800,0,48,48],"AudioSpeechToText":[1850,0,48,48],"AudioTextToSpeech":[1900,0,48,48],"AuroraScript":[1950,0,48,48],"AvatarEditorService":[2000,0,48,48],"AvatarSettings":[0,50,48,48],"Backpack":[50,50,48,48],"BallSocketConstraint":[100,50,48,48],"BasePlate":[150,50,48,48],"Beam":[200,50,48,48],"BillboardGui":[250,50,48,48],"BindableEvent":[300,50,48,48],"BindableFunction":[350,50,48,48],"BlockMesh":[400,50,48,48],"BloomEffect":[450,50,48,48],"BlurEffect":[500,50,48,48],"BodyAngularVelocity":[550,50,48,48],"BodyColors":[600,50,48,48],"BodyForce":[650,50,48,48],"BodyGyro":[700,50,48,48],"BodyPosition":[750,50,48,48],"BodyThrust":[800,50,48,48],"BodyVelocity":[850,50,48,48],"Bone":[900,50,48,48],"BoolValue":[950,50,48,48],"BoxHandleAdornment":[1000,50,48,48],"Breakpoint":[1050,50,48,48],"BrickColorValue":[1100,50,48,48],"BubbleChatConfiguration":[1150,50,48,48],"Buggaroo":[1200,50,48,48],"CFrameValue":[1250,50,48,48],"Camera":[1300,50,48,48],"CanvasGroup":[1350,50,48,48],"ChannelTabsConfiguration":[1400,50,48,48],"CharacterControllerManager":[1450,50,48,48],"CharacterMesh":[1500,50,48,48],"Chat":[1550,50,48,48],"ChatInputBarConfiguration":[1600,50,48,48],"ChatWindowConfiguration":[1650,50,48,48],"ChorusSoundEffect":[1700,50,48,48],"Class":[1750,50,48,48],"Cleanup":[1800,50,48,48],"ClickDetector":[1850,50,48,48],"ClientReplicator":[1900,50,48,48],"ClimbController":[1950,50,48,48],"Clouds":[2000,50,48,48],"Color":[0,100,48,48],"ColorCorrectionEffect":[50,100,48,48],"CompressorSoundEffect":[100,100,48,48],"ConeHandleAdornment":[150,100,48,48],"Configuration":[200,100,48,48],"Constant":[250,100,48,48],"Constructor":[300,100,48,48],"Controller":[350,100,48,36],"CoreGui":[400,100,48,48],"CornerWedgePart":[450,100,48,48],"CylinderHandleAdornment":[500,100,48,48],"CylindricalConstraint":[550,100,48,48],"Decal":[600,100,48,48],"DepthOfFieldEffect":[650,100,48,48],"Dialog":[700,100,48,48],"DialogChoice":[750,100,48,48],"DistortionSoundEffect":[800,100,48,48],"DragDetector":[850,100,48,48],"EchoSoundEffect":[900,100,48,48],"EditableImage":[950,100,48,48],"EditableMesh":[1000,100,48,48],"Enum":[1050,100,48,48],"EnumMember":[1100,100,48,48],"EqualizerSoundEffect":[1150,100,48,48],"Event":[1200,100,48,48],"Explosion":[1250,100,48,48],"FaceControls":[1300,100,48,48],"Field":[1350,100,48,48],"File":[1400,100,48,48],"Fire":[1450,100,48,48],"FlangeSoundEffect":[1500,100,48,48],"Folder":[1550,100,48,48],"ForceField":[1600,100,48,48],"Frame":[1650,100,48,48],"Function":[1700,100,48,48],"GameSettings":[1750,100,48,48],"GroundController":[1800,100,48,48],"Handles":[1850,100,48,48],"HapticEffect":[1900,100,48,48],"HapticService":[1950,100,48,48],"HeightmapImporterService":[2000,100,48,48],"Highlight":[0,150,48,48],"HingeConstraint":[50,150,48,48],"Humanoid":[100,150,48,48],"HumanoidDescription":[150,150,48,48],"IKControl":[200,150,48,48],"ImageButton":[250,150,48,48],"ImageHandleAdornment":[300,150,48,48],"ImageLabel":[350,150,48,48],"InputAction":[400,150,48,48],"InputBinding":[450,150,48,48],"InputContext":[500,150,48,48],"Interface":[550,150,48,48],"IntersectOperation":[600,150,48,48],"Keyword":[650,150,48,48],"Lighting":[700,150,48,48],"LineForce":[750,150,48,48],"LineHandleAdornment":[800,150,48,48],"LinearVelocity":[850,150,48,48],"LocalFile":[900,150,48,48],"LocalScript":[950,150,48,48],"LocalizationService":[1000,150,48,48],"LocalizationTable":[1050,150,48,48],"MaterialService":[1100,150,48,48],"MaterialVariant":[1150,150,48,48],"MemoryStoreService":[1200,150,48,48],"MeshPart":[1250,150,48,48],"Meshparts":[1300,150,48,48],"MessagingService":[1350,150,48,48],"Method":[1400,150,48,48],"Model":[1450,150,48,48],"Modelgroups":[1500,150,48,48],"Module":[1550,150,48,48],"ModuleScript":[1600,150,48,48],"Motor6D":[1650,150,48,48],"NegateOperation":[1700,150,48,48],"NetworkClient":[1750,150,48,48],"NoCollisionConstraint":[1800,150,48,48],"Operator":[1850,150,48,48],"PackageLink":[1900,150,48,48],"Pants":[1950,150,48,48],"Part":[2000,150,48,48],"ParticleEmitter":[0,200,48,48],"Path2D":[50,200,48,48],"PathfindingLink":[100,200,48,48],"PathfindingModifier":[150,200,48,48],"PathfindingService":[200,200,48,48],"PitchShiftSoundEffect":[250,200,48,48],"Place":[300,200,48,48],"Plane":[350,200,48,48],"PlaneConstraint":[400,200,48,48],"Player":[450,200,48,48],"Players":[500,200,48,48],"PluginGuiService":[550,200,48,48],"PointLight":[600,200,48,48],"PrismaticConstraint":[650,200,48,48],"Property":[700,200,48,48],"ProximityPrompt":[750,200,48,48],"PublishService":[800,200,48,48],"Reference":[850,200,48,48],"RemoteEvent":[900,200,48,48],"RemoteFunction":[950,200,48,48],"RenderingTest":[1000,200,48,48],"ReplicatedFirst":[1050,200,48,48],"ReplicatedScriptService":[1100,200,48,48],"ReplicatedStorage":[1150,200,48,48],"ReverbSoundEffect":[1200,200,48,48],"RigidConstraint":[1250,200,48,48],"RobloxPluginGuiService":[1300,200,48,48],"RocketPropulsion":[1350,200,48,48],"RodConstraint":[1400,200,48,48],"RopeConstraint":[1450,200,48,48],"Rotate":[1500,200,48,48],"ScreenGui":[1550,200,48,48],"Script":[1600,200,48,48],"ScrollingFrame":[1650,200,48,48],"Seat":[1700,200,48,48],"Selected_Workspace":[1750,200,48,48],"SelectionBox":[1800,200,48,48],"SelectionSphere":[1850,200,48,48],"ServerScriptService":[1900,200,48,48],"ServerStorage":[1950,200,48,48],"Service":[2000,200,48,48],"Shirt":[0,250,48,48],"ShirtGraphic":[50,250,48,48],"SkinnedMeshPart":[100,250,48,48],"Sky":[150,250,48,48],"Smoke":[200,250,48,48],"Snap":[250,250,48,48],"Snippet":[300,250,48,48],"SocialService":[350,250,48,48],"Sound":[400,250,48,48],"SoundEffect":[450,250,48,48],"SoundGroup":[500,250,48,48],"SoundService":[550,250,48,48],"Sparkles":[600,250,48,48],"SpawnLocation":[650,250,48,48],"SpecialMesh":[700,250,48,48],"SphereHandleAdornment":[750,250,48,48],"SpotLight":[800,250,48,48],"SpringConstraint":[850,250,48,48],"StandalonePluginScripts":[900,250,48,48],"StarterCharacterScripts":[950,250,48,48],"StarterGui":[1000,250,48,48],"StarterPack":[1050,250,48,48],"StarterPlayer":[1100,250,48,48],"StarterPlayerScripts":[1150,250,48,48],"Struct":[1200,250,48,48],"StyleDerive":[1250,250,48,48],"StyleLink":[1300,250,48,48],"StyleRule":[1350,250,48,48],"StyleSheet":[1400,250,48,48],"SunRaysEffect":[1450,250,48,48],"SurfaceAppearance":[1500,250,48,48],"SurfaceGui":[1550,250,48,48],"SurfaceLight":[1600,250,48,48],"SurfaceSelection":[1650,250,48,48],"SwimController":[1700,250,48,48],"TaskScheduler":[1750,250,48,48],"Team":[1800,250,48,48],"Teams":[1850,250,48,48],"Terrain":[1900,250,48,48],"TerrainDetail":[1950,250,48,48],"TestService":[2000,250,48,48],"TextBox":[0,300,48,48],"TextBoxService":[50,300,48,48],"TextButton":[100,300,48,48],"TextChannel":[150,300,48,48],"TextChatCommand":[200,300,48,48],"TextChatService":[250,300,48,48],"TextLabel":[300,300,48,48],"TextString":[350,300,48,48],"Texture":[400,300,48,48],"Tool":[450,300,48,48],"Torque":[500,300,48,48],"TorsionSpringConstraint":[550,300,48,48],"Trail":[600,300,48,48],"TremoloSoundEffect":[650,300,48,48],"TrussPart":[700,300,48,48],"TypeParameter":[750,300,48,48],"UGCValidationService":[800,300,48,48],"UIAspectRatioConstraint":[850,300,48,48],"UICorner":[900,300,48,48],"UIDragDetector":[950,300,48,48],"UIFlexItem":[1000,300,48,48],"UIGradient":[1050,300,48,48],"UIGridLayout":[1100,300,48,48],"UIListLayout":[1150,300,48,48],"UIPadding":[1200,300,48,48],"UIPageLayout":[1250,300,48,48],"UIScale":[1300,300,48,48],"UISizeConstraint":[1350,300,48,48],"UIStroke":[1400,300,48,48],"UITableLayout":[1450,300,48,48],"UITextSizeConstraint":[1500,300,48,48],"UnionOperation":[1550,300,48,48],"Unit":[1600,300,48,48],"UniversalConstraint":[1650,300,48,48],"UnreliableRemoteEvent":[1700,300,48,48],"UpdateAvailable":[1750,300,48,48],"UserService":[1800,300,48,48],"VRService":[1850,300,48,48],"Value":[1900,300,48,48],"Variable":[1950,300,48,48],"VectorForce":[2000,300,48,48],"VehicleSeat":[0,350,48,48],"VideoDisplay":[50,350,48,48],"VideoFrame":[100,350,48,48],"VideoPlayer":[150,350,48,48],"ViewportFrame":[200,350,48,48],"VirtualUser":[250,350,48,48],"VoiceChannel":[300,350,48,48],"VoiceChatService":[350,350,48,48],"Voicechat":[400,350,48,48],"WedgePart":[450,350,48,48],"Weld":[500,350,48,48],"WeldConstraint":[550,350,48,48],"Wire":[600,350,48,48],"WireframeHandleAdornment":[650,350,48,48],"Workspace":[700,350,48,48],"WorldModel":[750,350,48,48],"WrapDeformer":[800,350,48,48],"WrapLayer":[850,350,48,48],"WrapTarget":[900,350,48,48]}
+
+# ------------------------------
+# File: src/generics/attributes.ts
+# ------------------------------
+
+export default {
+  EmitCount: {
+    name: "EmitCount",
+    type: "number",
+    short: "The amount of times a particle or an effect is emitted.",
+  },
+
+  EmitDelay: {
+    name: "EmitDelay",
+    type: "number",
+    short: "The amount of seconds waited before the effect is emitted.",
+  },
+
+  EmitDuration: {
+    name: "EmitDuration",
+    type: "number",
+    short: "The amount of seconds the effect is delayed by.",
+  },
+
+  EffectDuration: {
+    name: "EffectDuration",
+    type: "NumberRange",
+    short: "The minimum and maximum duration of the effect.",
+  },
+
+  SyncPosition: {
+    name: "SyncPosition",
+    type: "boolean",
+    short: "Decides whether the effect follows its origin after being emitted.",
+    long: `
+    Decides whether the effect follows its origin after being emitted.
+    - Meshes, Beziers, and Spin Models find their first attachment or part ancestor and follow its CFrame.
+    - Shockwave Lines follow the CFrame of their origin attachment. SyncPosition Lines are useful for creating non-straight paths.
+    `,
+  },
+
+  Enabled: {
+    name: "Enabled",
+    type: "boolean",
+    short: "When true, emits a set amount of times per second.",
+    long: `
+      When true, emits the effect a set amount of times per second.
+      A special tag is required for this attribute to work. You can add it in the 'Behavior' section.
+    `,
+  },
+
+  Rate: {
+    name: "Rate",
+    type: "number",
+    short:
+      "Determines how many times per second an effect is emitted when Enabled.",
+  },
+
+  MinSize: {
+    name: "MinSize",
+    type: "Vector3",
+    short: "The minimum size of a part.",
+  },
+
+  MaxSize: {
+    name: "MaxSize",
+    type: "Vector3",
+    short: "The maximum size of a part.",
+  },
+
+  SizeScaleStart: {
+    name: "SizeScaleStart",
+    type: "Vector3",
+    short:
+      "The scale factor applied to a part's inital random size from which it animates to have exactly 1 scale on all axes.",
+  },
+
+  SizeScaleEnd: {
+    name: "SizeScaleEnd",
+    type: "Vector3",
+    short:
+      "The scale factor applied to a parts's size in an animation at the end of its lifetime.",
+  },
+
+  MinInitRot: {
+    name: "MinInitRot",
+    type: "Vector3",
+    short: "The minimum init rotation applied to the part.",
+  },
+
+  MaxInitRot: {
+    name: "MaxInitRot",
+    type: "Vector3",
+    short: "The maximum init rotation applied to the part.",
+  },
+};
+
+
+# ------------------------------
+# File: src/generics/curves.ts
+# ------------------------------
+
+import inputs from "./inputs";
+
+export default {
+  SeqTransparency: {
+    name: "Transparency",
+    short: "Controls the Transparency property.",
+    inputs: [
+      inputs.NormStart,
+      inputs.NormEnd,
+      inputs.Envelope,
+      inputs.Smoothness,
+    ],
+  },
+
+  SeqSize: {
+    name: "Size",
+    short: "Controls the Size property.",
+    inputs: [
+      inputs.PosStart,
+      inputs.PosEnd,
+      inputs.Envelope,
+      inputs.Smoothness,
+    ],
+  },
+
+  SeqSquash: {
+    name: "Squash",
+    short: "Controls the Squash property.",
+    inputs: [inputs.Start, inputs.End, inputs.Envelope, inputs.Smoothness],
+  },
+
+  Speed: {
+    name: "Speed",
+    short: "Controls the speed of the effect.",
+    long: "Controls the speed of the effect. If it becomes negative, all of the animations start going backwards.",
+    inputs: [inputs.Duration, inputs.Start, inputs.End],
+  },
+
+  ShockSize: {
+    name: "Size",
+    short: "Controls the easing of all Size animations.",
+    inputs: [inputs.Duration],
+  },
+
+  ShockTransparency: {
+    name: "Transparency",
+    short:
+      "Controls the easing of the Transparency animation at the end of the effect's lifetime.",
+    inputs: [inputs.PosStart, inputs.PosEnd],
+  },
+};
+
+
+# ------------------------------
+# File: src/generics/inputs.tsx
+# ------------------------------
+
+export default {
+  NormStart: {
+    name: "Start",
+    desc: "The starting value of the curve.",
+    range: [0, 1],
+  },
+
+  NormEnd: {
+    name: "End",
+    desc: "The ending value of the curve.",
+    range: [0, 1],
+  },
+
+  PosStart: {
+    name: "Start",
+    desc: "The starting value of the curve.",
+    range: [0, "inf"],
+  },
+
+  PosEnd: {
+    name: "End",
+    desc: "The ending value of the curve.",
+    range: [0, "inf"],
+  },
+
+  Start: {
+    name: "Start",
+    desc: "The starting value of the curve.",
+    range: ["-inf", "inf"],
+  },
+
+  End: {
+    name: "End",
+    desc: "The ending value of the curve.",
+    range: ["-inf", "inf"],
+  },
+
+  RangeStart: {
+    name: "Start",
+    desc: "The starting value range of the curve.",
+    range: ["-inf", "inf"],
+  },
+
+  RangeEnd: {
+    name: "End",
+    desc: "The ending value range of the curve.",
+    range: ["-inf", "inf"],
+  },
+
+  Duration: {
+    name: "Duration",
+    desc: "The amount of seconds it takes to reach the End value.",
+    range: [0, "inf"],
+  },
+
+  Envelope: {
+    name: "Envelope",
+    desc: "The value of envelope on each point in the converted NumberSequence.",
+    range: [0, "inf"],
+  },
+
+  Smoothness: {
+    name: "Smoothness",
+    desc: "The value that decides the amount of points on the curve, calculated using the [Newton Raphson method](https://en.wikipedia.org/wiki/Newton's_method).",
+    range: [0, 1],
+  },
+};
+
+
+# ------------------------------
+# File: src/templates/ModuleInit.mdx
+# ------------------------------
+
+import { Tree, Node } from "../components/RobloxTree"
+
+## Setup
+### Initialization
+
+First, we need to initialize the emit module on each client. The code below assumes you have the module inside ReplicatedStorage like this:
+
+<Tree title="Module Setup" className="mt-4">
+  <Node open type="ReplicatedStorage">
+    <Node type="ModuleScript" name="ForgeVFX"/>
+  </Node>
+</Tree>
+
+You can place this code inside a LocalScript in StarterPlayerScripts.
+
+```luau filename="forge_init.client.luau"
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local vfx = require(ReplicatedStorage.ForgeVFX)
+
+vfx.init()
+```
+
+

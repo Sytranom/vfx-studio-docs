@@ -14,6 +14,7 @@ import Layout from "@/components/Layout";
 import InfoBox from "@/components/InfoBox";
 import MdxImage from "@/components/MdxImage";
 import PaginationLink from "@/components/PaginationLink";
+import Steps from '@/components/Steps';
 
 import { navigation } from '@/config/siteConfig';
 
@@ -34,7 +35,7 @@ export default function DocsPage({ source, frontMatter, pagination }: DocsPagePr
       description={frontMatter.description}
     >
       <article className="doc-article">
-        <MDXRemote {...source} components={{ InfoBox, img: MdxImage }} />
+        <MDXRemote {...source} components={{ InfoBox, img: MdxImage, Steps }} />
       </article>
 
       <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border-color pt-8">

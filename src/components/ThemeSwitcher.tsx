@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun, faMoon, faDesktop } from '@fortawesome/free-solid-svg-icons';
+import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
 
 const ThemeSwitcher = () => {
   const [mounted, setMounted] = useState(false);
@@ -11,29 +12,38 @@ const ThemeSwitcher = () => {
     setMounted(true);
   }, []);
 
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
   if (!mounted) {
-    return <div className="w-9 h-9"></div>;
+    // Render a placeholder to prevent layout shift
+    return <div className="w-9 h-9" />;
   }
-
-  const getNextTheme = () => {
-    if (theme === 'system') return 'light';
-    if (theme === 'light') return 'dark';
-    return 'system';
-  };
-
-  const getIcon = () => {
-    if (theme === 'system') return faDesktop;
-    if (theme === 'light') return faSun;
-    return faMoon;
-  };
 
   return (
     <button
-      onClick={() => setTheme(getNextTheme())}
-      className="text-text-secondary text-xl w-9 h-9 grid place-items-center rounded-md transition-colors duration-200 ease-in-out hover:text-text-primary hover:bg-bg-main"
-      title={`Change theme (current: ${theme})`}
+      onClick={toggleTheme}
+      className="relative w-9 h-9 grid place-items-center rounded-md transition-colors duration-200 ease-in-out hover:bg-bg-inset"
+      title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      aria-label="Toggle theme"
     >
-      <FontAwesomeIcon icon={getIcon()} />
+      <AnimatePresence initial={false} mode="wait">
+        <motion.div
+          key={theme === 'dark' ? 'moon' : 'sun'}
+          initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
+          animate={{ opacity: 1, rotate: 0, scale: 1 }}
+          exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
+          transition={{ duration: 0.2, ease: 'easeInOut' }}
+          className="text-text-secondary text-lg"
+        >
+          {theme === 'dark' ? (
+            <FontAwesomeIcon icon={faMoon} />
+          ) : (
+            <FontAwesomeIcon icon={faSun} />
+          )}
+        </motion.div>
+      </AnimatePresence>
     </button>
   );
 };

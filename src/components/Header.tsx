@@ -2,9 +2,8 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { headerLinks } from "@/config/siteConfig";
-import ThemeSwitcher from "./ThemeSwitcher";
 import { useSidebarStore } from "@/hooks/use-sidebar";
-import WidthToggler from "./WidthToggler";
+import Breadcrumbs from "./Breadcrumbs";
 
 interface HeaderProps {
   breadcrumbs: string;
@@ -13,7 +12,6 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ breadcrumbs }) => {
   const { toggle } = useSidebarStore();
 
-  // Replace the event dispatch with this direct DOM manipulation:
   const handleSearchClick = () => {
     document.getElementById("search-modal-overlay")?.classList.add("visible");
     (document.getElementById("search-input") as HTMLInputElement)?.focus();
@@ -29,8 +27,8 @@ const Header: React.FC<HeaderProps> = ({ breadcrumbs }) => {
         >
           <FontAwesomeIcon icon={faBars} />
         </button>
-        <div className="text-text-secondary font-medium text-sm hidden sm:block">
-          {breadcrumbs}
+        <div className="hidden sm:block">
+          <Breadcrumbs path={breadcrumbs} />
         </div>
       </div>
       <div className="flex items-center gap-3">
@@ -40,8 +38,6 @@ const Header: React.FC<HeaderProps> = ({ breadcrumbs }) => {
           <span className="bg-bg-surface px-2 py-1 rounded text-xs border border-border-color hidden sm:inline">Ctrl+K</span>
         </button>
         <div className="flex items-center gap-1">
-          <ThemeSwitcher />
-          <WidthToggler />
           {headerLinks.map((link, index) => (
             <a
               href={link.href}

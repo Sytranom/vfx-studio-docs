@@ -1,15 +1,41 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-main: light-dark(#ffffff, #0d1117);
-  --color-bg-surface: light-dark(#f6f8fa, #161b22);
-  --color-bg-inset: light-dark(#f0f2f5, #010409);
-  --color-border-color: light-dark(#d0d7de, #30363d);
-  --color-primary-accent: light-dark(#0969da, #58a6ff);
-  --color-text-primary: light-dark(#1f2328, #c9d1d9);
-  --color-text-secondary: light-dark(#57606a, #8b949e);
-  --color-text-on-accent: light-dark(#ffffff, #0d1117);
+  /* --- THE NEW NEUTRAL-DARK THEME --- */
 
+  /* Your chosen accent color remains the star */
+  --color-primary-accent: #6366f1;
+  
+  /* --- Dark Theme Palette (Deeper & More Neutral) --- */
+  --color-bg-main-dark: #121212;
+  --color-bg-surface-dark: #1a1a1a;
+  --color-bg-inset-dark: #282828;
+  --color-border-color-dark: #363636;
+
+  --color-text-primary-dark: #e5e5e5;
+  --color-text-secondary-dark: #888888;
+  --color-text-on-accent-dark: #ffffff;
+
+  /* --- Light Theme Palette (Clean & Neutral) --- */
+  --color-bg-main-light: #ffffff;
+  --color-bg-surface-light: #f5f5f5;
+  --color-bg-inset-light: #e5e5e5;
+  --color-border-color-light: #d4d4d4;
+
+  --color-text-primary-light: #181818;
+  --color-text-secondary-light: #737373;
+  --color-text-on-accent-light: #ffffff;
+
+  /* --- Tailwind Theme Configuration --- */
+  --color-bg-main: light-dark(var(--color-bg-main-light), var(--color-bg-main-dark));
+  --color-bg-surface: light-dark(var(--color-bg-surface-light), var(--color-bg-surface-dark));
+  --color-bg-inset: light-dark(var(--color-bg-inset-light), var(--color-bg-inset-dark));
+  --color-border-color: light-dark(var(--color-border-color-light), var(--color-border-color-dark));
+  --color-text-primary: light-dark(var(--color-text-primary-light), var(--color-text-primary-dark));
+  --color-text-secondary: light-dark(var(--color-text-secondary-light), var(--color-text-secondary-dark));
+  --color-text-on-accent: light-dark(var(--color-text-on-accent-light), var(--color-text-on-accent-dark));
+
+  /* Shared fonts */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --font-mono: "JetBrains Mono", "SF Mono", "Courier New", monospace;
 }
@@ -20,6 +46,8 @@
     font-family: var(--font-sans);
   }
 }
+
+/* --- Component & Article Styles (no changes needed here) --- */
 
 .doc-article h1 {
   @apply text-5xl font-bold mb-4 pb-4 border-b border-border-color;
@@ -99,16 +127,59 @@
 }
 
 /* ANCHOR LINK STYLES */
+.doc-article h2,
+.doc-article h3 {
+  @apply relative;
+}
+
 .doc-article h2 .anchor,
 .doc-article h3 .anchor {
-  @apply invisible ml-2 text-text-secondary;
+  @apply no-underline;
+  color: inherit;
 }
 
-.doc-article h2:hover .anchor,
-.doc-article h3:hover .anchor {
-  @apply visible;
-}
-
-.doc-article .anchor:after {
+.doc-article h2 .anchor::after,
+.doc-article h3 .anchor::after {
   content: '#';
+  @apply absolute -left-5 top-1/2 -translate-y-1/2;
+  color: transparent;
+  transition: color 0.2s ease-in-out;
+}
+
+.doc-article h2:hover .anchor::after,
+.doc-article h3:hover .anchor::after {
+  color: var(--color-text-secondary);
+}
+
+/* --- STEPS COMPONENT --- */
+.steps {
+  counter-reset: step-counter;
+  @apply ml-2;
+}
+
+.steps > div {
+  counter-increment: step-counter;
+  @apply relative pl-12 pb-8 border-l-2 border-border-color;
+}
+
+.steps > div::before {
+  content: counter(step-counter);
+  @apply absolute -left-4 top-0 w-8 h-8 rounded-full bg-bg-surface border-2 border-border-color;
+  @apply flex items-center justify-center font-bold text-sm text-text-secondary;
+}
+
+.steps > div > h3 {
+  @apply text-lg font-semibold mt-0 mb-2;
+}
+
+.steps > div > p {
+  @apply text-sm text-text-secondary;
+}
+
+/* --- FADE TRUNCATE UTILITY (IMPROVED) --- */
+.fade-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%);
 }

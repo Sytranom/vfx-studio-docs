@@ -7,14 +7,17 @@ const SIZES: TextSizeType[] = ['sm', 'base', 'lg', 'xl'];
 
 const FontSizer = () => {
   const [mounted, setMounted] = useState(false);
+  // Always start with a default state that matches the server.
   const [currentSize, setCurrentSize] = useState<TextSizeType>('base');
 
+  // This effect runs only on the client, after the initial render.
   useEffect(() => {
-    setMounted(true);
+    // Now it's safe to check for the user's persisted setting and update the state.
     const initialSize = document.documentElement.dataset.textSize as TextSizeType | undefined;
     if (initialSize && SIZES.includes(initialSize)) {
       setCurrentSize(initialSize);
     }
+    setMounted(true);
   }, []);
 
   const setSize = (size: TextSizeType) => {
@@ -36,12 +39,16 @@ const FontSizer = () => {
     }
   };
 
-  const canDecrease = currentSize !== 'sm';
-  const canIncrease = currentSize !== 'xl';
-
+  // --- THIS IS THE FIX ---
+  // On the server and during the initial client render, show a static placeholder.
+  // This guarantees that the server and client HTML will match.
   if (!mounted) {
     return <div style={{width: '84px', height: '28px'}} />;
   }
+
+  // After mounting, render the actual interactive component with the correct state.
+  const canDecrease = currentSize !== 'sm';
+  const canIncrease = currentSize !== 'xl';
 
   return (
     <div className="flex items-center gap-1">
