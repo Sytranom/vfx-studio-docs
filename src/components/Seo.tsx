@@ -10,7 +10,7 @@ const Seo: React.FC<SeoProps> = ({ title, description }) => {
   const router = useRouter();
   const siteTitle = "VFX Studio Docs";
   const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
-  const siteUrl = "https://sytranom.github.io/vfx-studio-docs"; // CORRECT URL
+  const siteUrl = "https://sytranom.github.io/vfx-studio-docs"; 
   const canonicalUrl = siteUrl + (router.asPath === "/" ? "" : router.asPath).split('?')[0];
   const defaultDescription = "The official documentation for VFX Studio, an all-in-one toolkit for Roblox developers.";
   const pageDescription = description || defaultDescription;

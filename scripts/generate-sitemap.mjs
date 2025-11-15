@@ -1,44 +1,49 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import { URL } from 'url';
 
 async function generateSitemap() {
-  const siteUrl = 'https://sytranom.github.io'; 
-  const basePath = '/vfx-studio-docs'; // This is from your next.config.mjs
+  const siteUrl = 'https://sytranom.github.io';
+  const basePath = '/vfx-studio-docs';
   const publicDir = path.join(process.cwd(), 'public');
-  
-  const staticPages = (await fs.readdir(path.join(process.cwd(), 'src/pages')))
-    .filter(file => file.endsWith('.tsx') && !file.startsWith('_') && !file.includes('['))
-    .map(file => `/${file.replace('.tsx', '')}`);
 
-  const docPages = (await fs.readdir(path.join(process.cwd(), '_docs')))
-    .map(file => `/docs/${file.replace('.mdx', '')}`);
+  const getPaths = async (dir, prefix = '/') => {
+    const fullDir = path.join(process.cwd(), dir);
+    const entries = await fs.readdir(fullDir);
+    return entries
+      .filter(file => (file.endsWith('.tsx') || file.endsWith('.mdx')) && !file.startsWith('_') && !file.includes('['))
+      .map(file => path.join(prefix, file.replace(/\.(tsx|mdx)$/, '')));
+  };
 
-  const guidePages = (await fs.readdir(path.join(process.cwd(), 'src/pages/guides')))
-    .filter(file => file.endsWith('.tsx'))
-    .map(file => `/guides/${file.replace('.tsx', '')}`);
+  const staticPages = await getPaths('src/pages');
+  const docPages = await getPaths('_docs', '/docs');
+  const guidePages = await getPaths('src/pages/guides', '/guides');
+  const tutorialPages = await getPaths('src/pages/tutorials', '/tutorials');
 
-  const tutorialPages = (await fs.readdir(path.join(process.cwd(), 'src/pages/tutorials')))
-    .filter(file => file.endsWith('.tsx'))
-    .map(file => `/tutorials/${file.replace('.tsx', '')}`);
+  const allPaths = [...staticPages, ...docPages, ...guidePages, ...tutorialPages];
 
-  const allPaths = [...staticPages, ...docPages, ...guidePages, ...tutorialPages]
-    .map(p => p === '/index' ? '' : p); // Handle index route correctly
-  
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   ${allPaths
-    .map(url => `
+    .map(urlPath => {
+      
+      const finalPath = urlPath.endsWith('/index') ? urlPath.replace('/index', '/') : urlPath;
+
+const finalUrl = new URL(path.join(basePath, finalPath), siteUrl).href;
+
+      return `
     <url>
-      <loc>${siteUrl}${basePath}${url}</loc>
+      <loc>${finalUrl}</loc>
       <lastmod>${new Date().toISOString()}</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
-    </url>`)
+    </url>`;
+    })
     .join('')}
 </urlset>`;
 
   await fs.writeFile(path.join(publicDir, 'sitemap.xml'), sitemap);
-  console.log('✅ Sitemap generated successfully with correct github.io URLs!');
+  console.log('✅ Sitemap generated successfully with robust URL construction!');
 }
 
 generateSitemap();
