@@ -88,23 +88,18 @@ const prettyCodeOptions: Partial<Options> = {
     }
   },
   onVisitHighlightedLine(node) {
-    
     if (!node.properties) {
       node.properties = {};
     }
-    
     if (!Array.isArray(node.properties.className)) {
       node.properties.className = [];
     }
-    
     node.properties.className.push('highlighted');
   },
-  onVisitHighlightedWord(node) {
-    
+  onVisitHighlightedChars(node) {
     if (!node.properties) {
         node.properties = {};
     }
-    
     node.properties.className = ['highlighted', 'word'];
   },
 };
