@@ -10,7 +10,6 @@ import MobileOverlay from "./MobileOverlay";
 import Footer from "./Footer";
 import { useSidebarStore, SIDEBAR_STORAGE_KEY } from "@/hooks/use-sidebar";
 import { useContentWidthStore } from "@/hooks/use-content-width";
-
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 
 interface LayoutProps {
@@ -33,30 +32,30 @@ const Layout: React.FC<LayoutProps> = ({
 
   const mainScrollRef = useScrollToTop();
 
-useEffect(() => {
-    
+  useEffect(() => {
     const { highlight } = router.query;
     
     if (highlight && typeof highlight === 'string') {
       const term = decodeURIComponent(highlight).toLowerCase();
       console.log("[Layout] Auto-highlight requested for:", term);
 
-setTimeout(() => {
-
-const xpath = `
+      setTimeout(() => {
+        // Fixed: Properly closed template string for xpath
+        const xpath = `//text()[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '${term}')]`;
+        
         const result = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
         const textNode = result.singleNodeValue;
 
         if (textNode && textNode.parentElement) {
           const element = textNode.parentElement;
 
-element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-element.style.transition = 'background-color 0.5s ease';
+          element.style.transition = 'background-color 0.5s ease';
           const originalBg = element.style.backgroundColor;
           element.style.backgroundColor = 'rgba(255, 255, 0, 0.3)'; 
 
-setTimeout(() => {
+          setTimeout(() => {
             element.style.backgroundColor = originalBg;
             
             const newUrl = window.location.href.split('?')[0] + window.location.hash;
@@ -69,7 +68,7 @@ setTimeout(() => {
     }
   }, [router.query.highlight, router.asPath]);
 
-useEffect(() => {
+  useEffect(() => {
     try {
       const storedValue = localStorage.getItem(SIDEBAR_STORAGE_KEY);
       if (storedValue) {
@@ -80,7 +79,6 @@ useEffect(() => {
     }
     
     setIsMounted(true);
-    
   }, []);
 
   const contentWidthClass = {
@@ -104,12 +102,12 @@ useEffect(() => {
       
       <Header breadcrumbs={breadcrumbs} />
 
-      {}
+      {/* Main content area */}
       <main 
         ref={mainScrollRef}
         className="bg-bg-main lg:col-start-2 lg:row-start-2 lg:border-t lg:border-l lg:border-border-color lg:rounded-tl-lg overflow-auto min-w-0"
       >
-        {}
+        {/* Animate page transitions */}
         <motion.div
           key={router.asPath}
           initial={{ opacity: 0, y: 20 }}
