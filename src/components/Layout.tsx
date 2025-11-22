@@ -31,9 +31,45 @@ const Layout: React.FC<LayoutProps> = ({
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
 
-const mainScrollRef = useScrollToTop();
+  const mainScrollRef = useScrollToTop();
 
-  useEffect(() => {
+useEffect(() => {
+    
+    const { highlight } = router.query;
+    
+    if (highlight && typeof highlight === 'string') {
+      const term = decodeURIComponent(highlight).toLowerCase();
+      console.log("[Layout] Auto-highlight requested for:", term);
+
+setTimeout(() => {
+
+const xpath = `
+        const result = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        const textNode = result.singleNodeValue;
+
+        if (textNode && textNode.parentElement) {
+          const element = textNode.parentElement;
+
+element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+element.style.transition = 'background-color 0.5s ease';
+          const originalBg = element.style.backgroundColor;
+          element.style.backgroundColor = 'rgba(255, 255, 0, 0.3)'; 
+
+setTimeout(() => {
+            element.style.backgroundColor = originalBg;
+            
+            const newUrl = window.location.href.split('?')[0] + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+          }, 2000);
+        } else {
+          console.log("[Layout] No text node found for:", term);
+        }
+      }, 600); 
+    }
+  }, [router.query.highlight, router.asPath]);
+
+useEffect(() => {
     try {
       const storedValue = localStorage.getItem(SIDEBAR_STORAGE_KEY);
       if (storedValue) {
@@ -47,7 +83,7 @@ const mainScrollRef = useScrollToTop();
     
   }, []);
 
-const contentWidthClass = {
+  const contentWidthClass = {
     normal: 'max-w-3xl',
     wide: 'max-w-5xl',
     fluid: 'max-w-full px-4',
@@ -73,6 +109,7 @@ const contentWidthClass = {
         ref={mainScrollRef}
         className="bg-bg-main lg:col-start-2 lg:row-start-2 lg:border-t lg:border-l lg:border-border-color lg:rounded-tl-lg overflow-auto min-w-0"
       >
+        {}
         <motion.div
           key={router.asPath}
           initial={{ opacity: 0, y: 20 }}

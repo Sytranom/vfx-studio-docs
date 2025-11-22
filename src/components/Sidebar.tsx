@@ -16,6 +16,8 @@ const Sidebar: React.FC = () => {
   const { isOpen, close, width } = useSidebarStore();
   const router = useRouter();
 
+const currentPath = router.asPath.split(/[?#]/)[0];
+
   useEffect(() => {
     const handleRouteChange = () => close();
     router.events.on('routeChangeComplete', handleRouteChange);
@@ -36,15 +38,18 @@ const Sidebar: React.FC = () => {
     >
       <div className="flex flex-col h-full">
         <div className="h-[60px] flex-shrink-0 flex items-center px-3">
-          <Link href="/" className="flex items-center gap-3 text-xl font-semibold text-text-primary no-underline">
+          <Link href="/" className="flex items-center gap-3 text-xl font-semibold text-text-primary no-underline group">
             <span className="inline-block w-6 h-6 bg-primary-accent logo-mask transition-transform duration-400 ease-out group-hover:rotate-12 group-hover:scale-110"></span>
-            
             <span>VFX Studio</span>
           </Link>
         </div>
         <nav className="flex-grow overflow-y-auto overflow-x-hidden px-3">
           {navigation.map((section) => (
-            <NavSectionComponent key={section.title} section={section} />
+            <NavSectionComponent 
+              key={section.title} 
+              section={section} 
+              currentPath={currentPath} 
+            />
           ))}
         </nav>
         
@@ -68,8 +73,7 @@ const Sidebar: React.FC = () => {
   );
 };
 
-const NavSectionComponent: React.FC<{ section: NavSection }> = ({ section }) => {
-  const router = useRouter();
+const NavSectionComponent: React.FC<{ section: NavSection; currentPath: string }> = ({ section, currentPath }) => {
   return (
     <div className="mb-6">
       <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-3 px-3">{section.title}</h3>
@@ -78,7 +82,7 @@ const NavSectionComponent: React.FC<{ section: NavSection }> = ({ section }) => 
           <NavItemComponent
             key={link.title}
             item={link}
-            currentPath={router.asPath}
+            currentPath={currentPath}
           />
         ))}
       </ul>
@@ -120,7 +124,6 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
   }, [isParentOfActive, item.title, setSectionOpen]);
   
   useEffect(() => {
-    
     if (isOpen && childrenUListRef.current) {
       const links = Array.from(childrenUListRef.current.querySelectorAll('a'));
       
@@ -137,11 +140,16 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
         trackRef.current.style.height = `${height}px`;
       }
       
-      const activeLink = links.find(a => a.pathname === currentPath);
+      const activeLink = links.find(a => {
+        return a.getAttribute('href') === currentPath;
+      });
+
       if (activeLink) {
         const targetHeight = activeLink.offsetHeight * 0.6;
         const targetTop = activeLink.offsetTop + (activeLink.offsetHeight - targetHeight) / 2;
         setIndicatorStyle({ top: targetTop, height: targetHeight, opacity: 1 });
+      } else {
+        setIndicatorStyle(prev => ({ ...prev, opacity: 0 }));
       }
     }
   }, [currentPath, isOpen, item.children]);
@@ -154,7 +162,7 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
   };
 
   const isActive = (!hasChildren && currentPath === item.href) || isParentOfActive;
-  const isChildActive = (childHref: string) => currentPath === childHref;
+  
   const linkClasses = `flex items-center gap-3.5 w-full py-2.5 px-3 rounded-md no-underline font-medium text-sm transition-colors duration-200 ease-in-out relative cursor-pointer select-none
     ${isActive ? 'bg-primary-accent/10 text-text-primary' : 'text-text-secondary hover:bg-bg-inset hover:text-text-primary'}
   `;
@@ -192,17 +200,12 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
             <ul ref={childrenUListRef} className="list-none relative py-1">
-              {}
-              {}
               <ClientOnly>
-                {}
                 <div 
                   ref={trackRef} 
                   className="absolute w-[2px] bg-border-color/50"
                   style={{ left: '-1px' }}
                 />
-                
-                {}
                 <AnimatePresence>
                   {isParentOfActive && (
                     <motion.div
@@ -217,20 +220,23 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
                 </AnimatePresence>
               </ClientOnly>
 
-              {item.children?.map((child) => (
-                <li key={child.href}>
-                  <Link
-                    href={child.href}
-                    className={`block text-sm py-2 pl-4 rounded-md transition-colors duration-200 ease-in-out fade-truncate ${
-                      isChildActive(child.href) 
-                        ? "text-primary-accent font-semibold" 
-                        : "text-text-secondary hover:text-text-primary hover:bg-bg-inset"
-                    }`}
-                  >
-                    {child.title}
-                  </Link>
-                </li>
-              ))}
+              {item.children?.map((child) => {
+                const isChildActive = currentPath === child.href;
+                return (
+                  <li key={child.href}>
+                    <Link
+                      href={child.href}
+                      className={`block text-sm py-2 pl-4 rounded-md transition-colors duration-200 ease-in-out fade-truncate ${
+                        isChildActive
+                          ? "text-primary-accent font-semibold" 
+                          : "text-text-secondary hover:text-text-primary hover:bg-bg-inset"
+                      }`}
+                    >
+                      {child.title}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </motion.div>
         )}
