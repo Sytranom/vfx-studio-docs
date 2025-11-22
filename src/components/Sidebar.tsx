@@ -10,13 +10,12 @@ import { useNavigationStore } from "@/hooks/use-navigation-store";
 import SidebarResizer from "./SidebarResizer";
 import ThemeSwitcher from "./ThemeSwitcher";
 import WidthToggler from "./WidthToggler";
-import ClientOnly from "./ClientOnly";
 
 const Sidebar: React.FC = () => {
   const { isOpen, close, width } = useSidebarStore();
   const router = useRouter();
 
-const currentPath = router.asPath.split(/[?#]/)[0];
+  const currentPath = router.asPath.split(/[?#]/)[0];
 
   useEffect(() => {
     const handleRouteChange = () => close();
@@ -39,6 +38,11 @@ const currentPath = router.asPath.split(/[?#]/)[0];
       <div className="flex flex-col h-full">
         <div className="h-[60px] flex-shrink-0 flex items-center px-3">
           <Link href="/" className="flex items-center gap-3 text-xl font-semibold text-text-primary no-underline group">
+            {/* 
+               FIX: The logo usually 404s on GitHub pages because of the base path. 
+               This CSS class 'logo-mask' usually references url('/logo.png'). 
+               Ensure your globals.css accounts for the base path, or use an inline style here.
+            */}
             <span className="inline-block w-6 h-6 bg-primary-accent logo-mask transition-transform duration-400 ease-out group-hover:rotate-12 group-hover:scale-110"></span>
             <span>VFX Studio</span>
           </Link>
@@ -123,25 +127,57 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
     }
   }, [isParentOfActive, item.title, setSectionOpen]);
   
+  // --- DEBUGGING & FIX AREA ---
   useEffect(() => {
-    if (isOpen && childrenUListRef.current) {
+    // We wrap this in a small timeout to ensure the DOM has fully painted styles/fonts
+    // before we try to measure heights.
+    const timer = setTimeout(() => {
+      if (!isOpen) return;
+
+      // DEBUG: Check if refs exist
+      if (!childrenUListRef.current) {
+        console.log(`[Sidebar Debug] ${item.title}: Missing UL ref`);
+        return;
+      }
+      if (!trackRef.current) {
+        console.log(`[Sidebar Debug] ${item.title}: Missing Track ref`);
+        return;
+      }
+
       const links = Array.from(childrenUListRef.current.querySelectorAll('a'));
       
-      if (trackRef.current && links.length > 1) {
-        const firstLink = links[0];
-        const lastLink = links[links.length - 1];
-        
-        const top = firstLink.offsetTop + firstLink.offsetHeight / 4.75;
-        const bottom = lastLink.offsetTop + lastLink.offsetHeight / 1.25;
-        
-        const height = bottom - top;
+      // DEBUG: Check links found
+      if (links.length <= 1) {
+        console.log(`[Sidebar Debug] ${item.title}: Not enough links (${links.length}) for a track`);
+        return;
+      }
 
+      const firstLink = links[0];
+      const lastLink = links[links.length - 1];
+      
+      // DEBUG: Log measurements
+      console.log(`[Sidebar Debug] ${item.title} measurements:`, {
+        firstOffsetTop: firstLink.offsetTop,
+        firstOffsetHeight: firstLink.offsetHeight,
+        lastOffsetTop: lastLink.offsetTop,
+        lastOffsetHeight: lastLink.offsetHeight
+      });
+
+      const top = firstLink.offsetTop + firstLink.offsetHeight / 4.75;
+      const bottom = lastLink.offsetTop + lastLink.offsetHeight / 1.25;
+      const height = bottom - top;
+
+      // Apply styles
+      if (trackRef.current) {
         trackRef.current.style.top = `${top}px`;
         trackRef.current.style.height = `${height}px`;
       }
-      
+
+      // Active Indicator Logic
       const activeLink = links.find(a => {
-        return a.getAttribute('href') === currentPath;
+        // Check if href matches (handling base path issues)
+        return a.getAttribute('href') === currentPath || 
+               a.getAttribute('href')?.endsWith(currentPath);
       });
 
       if (activeLink) {
@@ -151,8 +187,10 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
       } else {
         setIndicatorStyle(prev => ({ ...prev, opacity: 0 }));
       }
-    }
-  }, [currentPath, isOpen, item.children]);
+    }, 150); // Wait 150ms for layout/fonts to settle
+
+    return () => clearTimeout(timer);
+  }, [currentPath, isOpen, item.children, item.title]);
 
   const handleToggle = (e: React.MouseEvent) => {
     if (hasChildren) {
@@ -200,25 +238,24 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
             <ul ref={childrenUListRef} className="list-none relative py-1">
-              <ClientOnly>
-                <div 
-                  ref={trackRef} 
-                  className="absolute w-[2px] bg-border-color/50"
-                  style={{ left: '-1px' }}
-                />
-                <AnimatePresence>
-                  {isParentOfActive && (
-                    <motion.div
-                      layoutId="active-sidebar-indicator"
-                      className="absolute w-[3px] bg-primary-accent rounded-full"
-                      initial={false}
-                      animate={indicatorStyle}
-                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                      style={{ left: '-1.5px' }}
-                    />
-                  )}
-                </AnimatePresence>
-              </ClientOnly>
+              {/* Track Line */}
+              <div 
+                ref={trackRef} 
+                className="absolute w-[2px] bg-border-color/50"
+                style={{ left: '-1px' }}
+              />
+              <AnimatePresence>
+                {isParentOfActive && (
+                  <motion.div
+                    layoutId="active-sidebar-indicator"
+                    className="absolute w-[3px] bg-primary-accent rounded-full"
+                    initial={false}
+                    animate={indicatorStyle}
+                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    style={{ left: '-1.5px' }}
+                  />
+                )}
+              </AnimatePresence>
 
               {item.children?.map((child) => {
                 const isChildActive = currentPath === child.href;

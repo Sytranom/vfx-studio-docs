@@ -193,8 +193,8 @@
 }
 
 .logo-mask {
-  -webkit-mask-image: url('/logo.png');
-  mask-image: url('/logo.png');
+  -webkit-mask-image: url('/vfx-studio-docs/logo.png');
+  mask-image: url('/vfx-studio-docs/logo.png');
   -webkit-mask-size: contain;
   mask-size: contain;
   -webkit-mask-repeat: no-repeat;
