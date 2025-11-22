@@ -1,6 +1,8 @@
 import Link from "next/link";
 import FeatureSection from "@/components/FeatureSection";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 export async function getStaticProps() {
   return {
     props: {
@@ -36,7 +38,8 @@ export default function HomePage() {
       <div className="py-12 max-w-5xl mx-auto">
         <FeatureSection
           title="Iterate in Real-Time"
-          imageUrl="/input_file_0.png"
+          
+          imageUrl={`${BASE_PATH}/input_file_0.png`}
           imageAlt="The Emitter and Sliders Panel in VFX Studio for Roblox."
           imageWidth={400}
           imageHeight={550}
@@ -48,7 +51,8 @@ export default function HomePage() {
 
         <FeatureSection
           title="Unleash Complex Animations"
-          imageUrl="/input_file_1.png"
+          
+          imageUrl={`${BASE_PATH}/input_file_1.png`}
           imageAlt="The powerful Bezier Curve Editor for creating fluid animations."
           imageWidth={500}
           imageHeight={450}
@@ -62,7 +66,8 @@ export default function HomePage() {
 
         <FeatureSection
           title="A Comprehensive Asset Library"
-          imageUrl="/input_file_2.png"
+          
+          imageUrl={`${BASE_PATH}/input_file_2.png`}
           imageAlt="The built-in Asset Library with thousands of textures and meshes."
           imageWidth={400}
           imageHeight={600}

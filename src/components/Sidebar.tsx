@@ -38,11 +38,6 @@ const Sidebar: React.FC = () => {
       <div className="flex flex-col h-full">
         <div className="h-[60px] flex-shrink-0 flex items-center px-3">
           <Link href="/" className="flex items-center gap-3 text-xl font-semibold text-text-primary no-underline group">
-            {/* 
-               FIX: The logo usually 404s on GitHub pages because of the base path. 
-               This CSS class 'logo-mask' usually references url('/logo.png'). 
-               Ensure your globals.css accounts for the base path, or use an inline style here.
-            */}
             <span className="inline-block w-6 h-6 bg-primary-accent logo-mask transition-transform duration-400 ease-out group-hover:rotate-12 group-hover:scale-110"></span>
             <span>VFX Studio</span>
           </Link>
@@ -103,8 +98,8 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
   const hasBeenOpened = useRef(false);
   const childrenUListRef = useRef<HTMLUListElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  
-  const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0, opacity: 0 });
+
+const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: number; opacity: number } | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -127,55 +122,25 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
     }
   }, [isParentOfActive, item.title, setSectionOpen]);
   
-  // --- DEBUGGING & FIX AREA ---
   useEffect(() => {
-    // We wrap this in a small timeout to ensure the DOM has fully painted styles/fonts
-    // before we try to measure heights.
-    const timer = setTimeout(() => {
-      if (!isOpen) return;
 
-      // DEBUG: Check if refs exist
-      if (!childrenUListRef.current) {
-        console.log(`[Sidebar Debug] ${item.title}: Missing UL ref`);
-        return;
-      }
-      if (!trackRef.current) {
-        console.log(`[Sidebar Debug] ${item.title}: Missing Track ref`);
-        return;
-      }
+const timer = setTimeout(() => {
+      if (!isOpen || !childrenUListRef.current || !trackRef.current) return;
 
       const links = Array.from(childrenUListRef.current.querySelectorAll('a'));
-      
-      // DEBUG: Check links found
-      if (links.length <= 1) {
-        console.log(`[Sidebar Debug] ${item.title}: Not enough links (${links.length}) for a track`);
-        return;
-      }
+      if (links.length <= 1) return;
 
       const firstLink = links[0];
       const lastLink = links[links.length - 1];
       
-      // DEBUG: Log measurements
-      console.log(`[Sidebar Debug] ${item.title} measurements:`, {
-        firstOffsetTop: firstLink.offsetTop,
-        firstOffsetHeight: firstLink.offsetHeight,
-        lastOffsetTop: lastLink.offsetTop,
-        lastOffsetHeight: lastLink.offsetHeight
-      });
-
       const top = firstLink.offsetTop + firstLink.offsetHeight / 4.75;
       const bottom = lastLink.offsetTop + lastLink.offsetHeight / 1.25;
       const height = bottom - top;
 
-      // Apply styles
-      if (trackRef.current) {
-        trackRef.current.style.top = `${top}px`;
-        trackRef.current.style.height = `${height}px`;
-      }
+      trackRef.current.style.top = `${top}px`;
+      trackRef.current.style.height = `${height}px`;
 
-      // Active Indicator Logic
       const activeLink = links.find(a => {
-        // Check if href matches (handling base path issues)
         return a.getAttribute('href') === currentPath || 
                a.getAttribute('href')?.endsWith(currentPath);
       });
@@ -185,9 +150,9 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
         const targetTop = activeLink.offsetTop + (activeLink.offsetHeight - targetHeight) / 2;
         setIndicatorStyle({ top: targetTop, height: targetHeight, opacity: 1 });
       } else {
-        setIndicatorStyle(prev => ({ ...prev, opacity: 0 }));
+        setIndicatorStyle(null);
       }
-    }, 150); // Wait 150ms for layout/fonts to settle
+    }, 150); 
 
     return () => clearTimeout(timer);
   }, [currentPath, isOpen, item.children, item.title]);
@@ -238,14 +203,14 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
             <ul ref={childrenUListRef} className="list-none relative py-1">
-              {/* Track Line */}
               <div 
                 ref={trackRef} 
                 className="absolute w-[2px] bg-border-color/50"
                 style={{ left: '-1px' }}
               />
               <AnimatePresence>
-                {isParentOfActive && (
+                {}
+                {isParentOfActive && indicatorStyle && (
                   <motion.div
                     layoutId="active-sidebar-indicator"
                     className="absolute w-[3px] bg-primary-accent rounded-full"

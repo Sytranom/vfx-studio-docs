@@ -40,8 +40,8 @@ const Layout: React.FC<LayoutProps> = ({
       console.log("[Layout] Auto-highlight requested for:", term);
 
       setTimeout(() => {
-        // Fixed: Properly closed template string for xpath
-        const xpath = `//text()[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '${term}')]`;
+        
+        const xpath = `
         
         const result = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
         const textNode = result.singleNodeValue;
@@ -102,12 +102,12 @@ const Layout: React.FC<LayoutProps> = ({
       
       <Header breadcrumbs={breadcrumbs} />
 
-      {/* Main content area */}
+      {}
       <main 
         ref={mainScrollRef}
         className="bg-bg-main lg:col-start-2 lg:row-start-2 lg:border-t lg:border-l lg:border-border-color lg:rounded-tl-lg overflow-auto min-w-0"
       >
-        {/* Animate page transitions */}
+        {}
         <motion.div
           key={router.asPath}
           initial={{ opacity: 0, y: 20 }}
