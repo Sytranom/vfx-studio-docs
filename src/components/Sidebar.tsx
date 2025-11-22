@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,6 +10,8 @@ import { useNavigationStore } from "@/hooks/use-navigation-store";
 import SidebarResizer from "./SidebarResizer";
 import ThemeSwitcher from "./ThemeSwitcher";
 import WidthToggler from "./WidthToggler";
+
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 const Sidebar: React.FC = () => {
   const { isOpen, close, width } = useSidebarStore();
@@ -98,8 +100,8 @@ const NavItemComponent: React.FC<{ item: NavItem; currentPath: string }> = ({
   const hasBeenOpened = useRef(false);
   const childrenUListRef = useRef<HTMLUListElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-
-const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: number; opacity: number } | null>(null);
+  
+  const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: number } | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -121,41 +123,51 @@ const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: numb
       setSectionOpen(item.title, true);
     }
   }, [isParentOfActive, item.title, setSectionOpen]);
-  
-  useEffect(() => {
 
-const timer = setTimeout(() => {
-      if (!isOpen || !childrenUListRef.current || !trackRef.current) return;
+  const calculateIndicator = useCallback(() => {
+    if (!isOpen) return;
 
-      const links = Array.from(childrenUListRef.current.querySelectorAll('a'));
-      if (links.length <= 1) return;
+    if (!childrenUListRef.current) return;
+    if (!trackRef.current) return;
 
-      const firstLink = links[0];
-      const lastLink = links[links.length - 1];
-      
-      const top = firstLink.offsetTop + firstLink.offsetHeight / 4.75;
-      const bottom = lastLink.offsetTop + lastLink.offsetHeight / 1.25;
-      const height = bottom - top;
+    const links = Array.from(childrenUListRef.current.querySelectorAll('a'));
 
+    if (links.length <= 1) return;
+
+    const firstLink = links[0];
+    const lastLink = links[links.length - 1];
+
+    if (firstLink.offsetHeight === 0) return;
+
+    const top = firstLink.offsetTop + firstLink.offsetHeight / 4.75;
+    const bottom = lastLink.offsetTop + lastLink.offsetHeight / 1.25;
+    const height = bottom - top;
+
+    if (trackRef.current) {
       trackRef.current.style.top = `${top}px`;
       trackRef.current.style.height = `${height}px`;
+    }
 
-      const activeLink = links.find(a => {
-        return a.getAttribute('href') === currentPath || 
-               a.getAttribute('href')?.endsWith(currentPath);
-      });
+    const activeLink = links.find(a => {
+      return a.getAttribute('href') === currentPath || 
+             a.getAttribute('href')?.endsWith(currentPath);
+    });
 
-      if (activeLink) {
-        const targetHeight = activeLink.offsetHeight * 0.6;
-        const targetTop = activeLink.offsetTop + (activeLink.offsetHeight - targetHeight) / 2;
-        setIndicatorStyle({ top: targetTop, height: targetHeight, opacity: 1 });
-      } else {
-        setIndicatorStyle(null);
-      }
-    }, 150); 
+    if (activeLink) {
+      const targetHeight = activeLink.offsetHeight * 0.6;
+      const targetTop = activeLink.offsetTop + (activeLink.offsetHeight - targetHeight) / 2;
+      setIndicatorStyle({ top: targetTop, height: targetHeight });
+    } else {
+      setIndicatorStyle(null);
+    }
+  }, [currentPath, isOpen]);
 
+  useIsomorphicLayoutEffect(() => {
+    calculateIndicator();
+    
+    const timer = setTimeout(calculateIndicator, 150);
     return () => clearTimeout(timer);
-  }, [currentPath, isOpen, item.children, item.title]);
+  }, [calculateIndicator]);
 
   const handleToggle = (e: React.MouseEvent) => {
     if (hasChildren) {
@@ -208,8 +220,8 @@ const timer = setTimeout(() => {
                 className="absolute w-[2px] bg-border-color/50"
                 style={{ left: '-1px' }}
               />
+              
               <AnimatePresence>
-                {}
                 {isParentOfActive && indicatorStyle && (
                   <motion.div
                     layoutId="active-sidebar-indicator"

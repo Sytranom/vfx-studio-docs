@@ -57,7 +57,7 @@ const Layout: React.FC<LayoutProps> = ({
           setTimeout(() => {
             element.style.backgroundColor = originalBg;
             
-            // Clean up the URL
+            
             const newUrl = window.location.href.split('?')[0] + window.location.hash;
             window.history.replaceState({}, document.title, newUrl);
           }, 2000);
@@ -102,12 +102,12 @@ const Layout: React.FC<LayoutProps> = ({
       
       <Header breadcrumbs={breadcrumbs} />
 
-      {/* Main content area */}
+      
       <main 
         ref={mainScrollRef}
         className="bg-bg-main lg:col-start-2 lg:row-start-2 lg:border-t lg:border-l lg:border-border-color lg:rounded-tl-lg overflow-auto min-w-0"
       >
-        {/* Animate page transitions */}
+        
         <motion.div
           key={router.asPath}
           initial={{ opacity: 0, y: 20 }}
